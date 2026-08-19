@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -76,6 +73,8 @@ class Counting(commands.Cog):
 
     @commands.group(name="counting", invoke_without_command=True)
     async def counting(self, ctx):
+        """
+Executes the counting command."""
         if not self.is_enabled(ctx.guild.id):
             await self.not_enabled_embed(ctx)
         else:
@@ -84,6 +83,7 @@ class Counting(commands.Cog):
     @counting.command(name="enable")
     @commands.has_permissions(manage_channels=True)
     async def enable(self, ctx):
+        """Executes the enable command."""
         guild_id = str(ctx.guild.id)
         if guild_id not in self.counting_data:
             self.counting_data[guild_id] = {"enabled": True, "channel": None, "count": 0, "reset_on_fail": False}
@@ -95,6 +95,7 @@ class Counting(commands.Cog):
     @counting.command(name="disable")
     @commands.has_permissions(manage_channels=True)
     async def disable(self, ctx):
+        """Executes the disable command."""
         guild_id = str(ctx.guild.id)
         if guild_id not in self.counting_data:
             await self.not_enabled_embed(ctx)
@@ -106,6 +107,7 @@ class Counting(commands.Cog):
     @counting.command(name="channel")
     @commands.has_permissions(manage_channels=True)
     async def channel(self, ctx, channel: discord.TextChannel):
+        """Executes the channel command."""
         guild_id = str(ctx.guild.id)
         if not self.is_enabled(guild_id):
             await self.not_enabled_embed(ctx)
@@ -117,6 +119,7 @@ class Counting(commands.Cog):
     @counting.command(name="config")
     @commands.has_permissions(manage_channels=True)
     async def config(self, ctx, mode: str):
+        """Executes the config command."""
         guild_id = str(ctx.guild.id)
         if not self.is_enabled(guild_id):
             await self.not_enabled_embed(ctx)
@@ -136,6 +139,7 @@ class Counting(commands.Cog):
     @counting.command(name="reset")
     @commands.has_permissions(manage_channels=True)
     async def reset(self, ctx):
+        """Executes the reset command."""
         guild_id = str(ctx.guild.id)
         if not self.is_enabled(guild_id):
             await self.not_enabled_embed(ctx)
@@ -146,6 +150,7 @@ class Counting(commands.Cog):
 
     @counting.command(name="stats")
     async def stats(self, ctx):
+        """Executes the stats command."""
         guild_id = str(ctx.guild.id)
         if not self.is_enabled(guild_id):
             await self.not_enabled_embed(ctx)
@@ -163,6 +168,7 @@ class Counting(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        """Executes the on message command."""
         if message.author.bot:
             return
 

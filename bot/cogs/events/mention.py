@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -19,7 +16,7 @@ from utils.emoji import ARROWRED, CODEBASE, HEART3, INDEX, ZYROXLINKS
 from discord.ui import LayoutView, TextDisplay, Separator, Container, ActionRow, Select
 from discord.ext import commands
 from utils.Tools import get_ignore_data
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 
 
 class MentionSelectView(LayoutView):
@@ -81,14 +78,13 @@ class MentionSelectView(LayoutView):
             )
         elif selected == "Developer Info":
             content = (
-                "There are only 2 Founders Who Created Me. Thanks You To Them 💞.\n\n"
+                "There is only 1 Founder Who Created Me. Thank You To Him 💞.\n\n"
                 "**The Founder**\n"
-                "**[01]. [Ray](https://discord.com/users/870179991462236170)**\n**[02]. [runxking](https://discord.com/users/767979794411028491)**"
+                "**[01]. [Avinash aka Shroud.bean](https://discord.com/users/your_user_id_here)**"
             )
         elif selected == "Links":
             content = (
-                f"**[Invite {BotName}](https://discord.com/oauth2/authorize?client_id=1396114795102470196)**\n"
-                "**[Join Support Server](https://discord.gg/codexdev)**"
+                f"**[Invite {BotName}](https://discord.com/oauth2/authorize?client_id=1537797127734952058&permissions=0&integration_type=0&scope=bot+applications.commands)**\n"
             )
 
         new_container = Container(
@@ -126,6 +122,7 @@ class Mention(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
+        """Executes the on message command."""
         if message.author.bot or not message.guild:
             return
 

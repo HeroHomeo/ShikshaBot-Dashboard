@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -27,7 +24,6 @@ restarts so the fresh IDs are loaded into memory.
 
 Call `run_sync(token)` once inside on_ready.
 """
-
 import os
 import re
 import sys
@@ -52,7 +48,8 @@ def system(msg):  _log("EmojiSync", Fore.MAGENTA, "★", msg)
 
 
 def _restart() -> None:
-    """Replace the current process with a fresh copy of itself."""
+    """
+Replace the current process with a fresh copy of itself."""
     system(f"Restarting bot to load updated emoji IDs...")
     # Flush stdout so the message is visible before the process is replaced
     sys.stdout.flush()

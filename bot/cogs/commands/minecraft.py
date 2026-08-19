@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -16,7 +13,7 @@ import discord
 from discord.ext import commands, tasks
 from discord import app_commands, ui, File
 from mcstatus import JavaServer, BedrockServer
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import os
 import re
 from datetime import datetime

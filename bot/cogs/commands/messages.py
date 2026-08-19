@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -16,7 +13,7 @@ import discord
 from utils.emoji import ARROWRED
 from discord.ui import LayoutView, TextDisplay, Separator, Container
 from discord.ext import commands
-import sqlite3
+from db import sqlite3_mock as sqlite3
 from datetime import datetime
 from utils.config import *
 
@@ -34,7 +31,7 @@ class MessagesView(LayoutView):
                     f"**Daily Messages**: {daily_average}\n"
                     f"**Today Messages**: {today_count}\n"
                     f"**Total Messages**: {total}\n\n"
-                    f"**{ARROWRED}Upgrade Your Experience With [{BRAND_NAME} Noprefix](https://discord.gg/codexdev)**"
+                    f"**{ARROWRED}Upgrade Your Experience With [{BRAND_NAME} Noprefix]()**"
                 ),
             )
         )
@@ -46,6 +43,7 @@ class Messages(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        """Executes the on message command."""
         if message.author.bot or not message.guild:
             return
 
@@ -83,6 +81,8 @@ class Messages(commands.Cog):
 
     @commands.command(name="messages", aliases=["msg"])
     async def messages(self, ctx, member: discord.Member = None):
+        """
+Executes the messages command."""
         member = member or ctx.author
         today = datetime.utcnow().strftime("%Y-%m-%d")
 

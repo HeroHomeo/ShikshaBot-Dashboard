@@ -4,16 +4,13 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 from __future__ import annotations
-from core import zyrox
+from core import shikshabot
 from colorama import Fore, Style, init
 
 
@@ -99,36 +96,36 @@ from .events.ai import AIResponses
 from .events.stickymessage import StickyMessageListener
 
 ########-------HELP-------########
-from .zyrox.antinuke import _antinuke
-from .zyrox.extra import _extra
-from .zyrox.general import _general
-from .zyrox.automod import _automod 
-from .zyrox.moderation import _moderation
-#from .zyrox.inviteTracker import _inviteTracker
-from .zyrox.music import _music
-from .zyrox.fun import _fun
-from .zyrox.games import _games
-from .zyrox.ignore import _ignore
-from .zyrox.server import _server
-from .zyrox.voice import _voice 
-from .zyrox.welcome import _welcome 
-from .zyrox.giveaway import _giveaway
-from .zyrox.ticket import _ticket
+from .shikshabot.antinuke import _antinuke
+from .shikshabot.extra import _extra
+from .shikshabot.general import _general
+from .shikshabot.automod import _automod 
+from .shikshabot.moderation import _moderation
+#from .shikshabot.inviteTracker import _inviteTracker
+from .shikshabot.music import _music
+from .shikshabot.fun import _fun
+from .shikshabot.games import _games
+from .shikshabot.ignore import _ignore
+from .shikshabot.server import _server
+from .shikshabot.voice import _voice 
+from .shikshabot.welcome import _welcome 
+from .shikshabot.giveaway import _giveaway
+from .shikshabot.ticket import _ticket
 #from .axon.vanityroles import Vanityroles69999
-from .zyrox.logging import _logging
-from .zyrox.vanity import _vanity
-from .zyrox.inviteTracker import inviteTracker 
-from .zyrox.counting import _Counting
-from .zyrox.j2c import _J2C
-from .zyrox.ai import _ai
-from .zyrox.booster import __boost 
-from .zyrox.leveling import _leveling
-from .zyrox.sticky import _sticky
-from .zyrox.verify import _verify
-from .zyrox.encryption import _encrypt
-from .zyrox.mc import _mc
-from .zyrox.joindm import _joindm
-from .zyrox.birth import _birth
+from .shikshabot.logging import _logging
+from .shikshabot.vanity import _vanity
+from .shikshabot.inviteTracker import inviteTracker 
+from .shikshabot.counting import _Counting
+from .shikshabot.j2c import _J2C
+from .shikshabot.ai import _ai
+from .shikshabot.booster import __boost 
+from .shikshabot.leveling import _leveling
+from .shikshabot.sticky import _sticky
+from .shikshabot.verify import _verify
+from .shikshabot.encryption import _encrypt
+from .shikshabot.mc import _mc
+from .shikshabot.joindm import _joindm
+from .shikshabot.birth import _birth
 
 #########ANTINUKE#########
 
@@ -165,7 +162,7 @@ from .automod.antilink import AntiLink
 from .automod.anti_invites import AntiInvite
 from .automod.anti_mass_mention import AntiMassMention
 from .automod.anti_emoji_spam import AntiEmojiSpam
-
+from .automod.antiprofanity import AntiProfanity
 
 from .moderation.ban import Ban
 from .moderation.unban import Unban
@@ -186,7 +183,7 @@ from .moderation.snipe import Snipe
 
 from utils.config import BotName
 
-async def setup(bot: zyrox):
+async def setup(bot: shikshabot):
   cogs_to_load = [
         Help, General, Moderation, Automod, Welcomer, Fun, Games, Extra,
         Voice, Owner, Customrole, afk, Embed, Media, Ignore, TicketCog, Logging,
@@ -197,7 +194,7 @@ async def setup(bot: zyrox):
         AntiChannelCreate, AntiChannelDelete, AntiChannelUpdate, AntiEveryone, AntiGuildUpdate,
         AntiIntegration, AntiKick, AntiPrune, AntiRoleCreate, AntiRoleDelete,
         AntiRoleUpdate, AntiWebhookUpdate, AntiWebhookCreate, 
-        AntiWebhookDelete, AntiSpam, AntiCaps, AntiLink, AntiInvite, AntiMassMention, Stats, Status, NoPrefix, FilterCog, AutoReaction, AutoReactListener, Ban, Unban, Mute, Unmute, Lock, Unlock, Hide, Unhide, Kick, Warn, Role, Message, Moderation, TopCheck, Snipe, Global, QR, VanityRoles, ReactionRoles, Messages, TranslateCog, FastGreet, Jail, inviteTracker,Counting,AI
+        AntiWebhookDelete, AntiSpam, AntiCaps, AntiLink, AntiInvite, AntiMassMention, AntiProfanity, Stats, Status, NoPrefix, FilterCog, AutoReaction, AutoReactListener, Ban, Unban, Mute, Unmute, Lock, Unlock, Hide, Unhide, Kick, Warn, Role, Message, Moderation, TopCheck, Snipe, Global, QR, VanityRoles, ReactionRoles, Messages, TranslateCog, FastGreet, Jail, inviteTracker,Counting,AI
     ]
 
 

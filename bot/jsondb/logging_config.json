@@ -20,5 +20,19 @@
     "ignore_users": [],
     "auto_delete_duration": 3600,
     "last_updated": "2026-05-04T07:52:41.305608"
+  },
+  "932455765875228742": {
+    "guild_id": "932455765875228742",
+    "log_channels": {
+      "join_leave_events": 1285945821933600800
+    },
+    "log_enabled": {
+      "join_leave_events": true
+    },
+    "ignore_channels": [],
+    "ignore_roles": [],
+    "ignore_users": [],
+    "auto_delete_duration": null,
+    "last_updated": "2026-08-15T08:37:29.797524"
   }
 }

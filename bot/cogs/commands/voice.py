@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -34,6 +31,8 @@ class Voice(commands.Cog):
     @blacklist_check()
     @ignore_check()
     async def vc(self, ctx: commands.Context):
+        """
+Executes the vc command."""
         if ctx.subcommand_passed is None:
             await ctx.send_help(ctx.command)
             ctx.command.reset_cooldown(ctx)
@@ -47,6 +46,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def _kick(self, ctx, *, member: discord.Member):
+        """Executes the  kick command."""
         if member.voice is None:
             embed = discord.Embed(title=f"{CROSS} Error",
 
@@ -80,6 +80,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def _kickall(self, ctx):
+        """Executes the  kickall command."""
         if ctx.author.voice is None:
             embed = discord.Embed(title=f"{CROSS} Error",
 
@@ -113,6 +114,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def _mute(self, ctx, *, member: discord.Member = None):
+        """Executes the  mute command."""
         if member is None:
             embed = discord.Embed(
                 title=f"{CROSS} Error",
@@ -171,6 +173,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def vcunmute(self, ctx, *, member: discord.Member):
+        """Executes the vcunmute command."""
         if member.voice is None:
             embed = discord.Embed(title=f"{CROSS} Error",
 
@@ -212,6 +215,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def _muteall(self, ctx):
+        """Executes the  muteall command."""
         if ctx.author.voice is None:
             embed = discord.Embed(title=f"{CROSS} Error",
 
@@ -249,6 +253,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def _unmuteall(self, ctx):
+        """Executes the  unmuteall command."""
         if ctx.author.voice is None:
             embed = discord.Embed(title=f"{CROSS} Error",
 
@@ -286,6 +291,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def _deafen(self, ctx, *, member: discord.Member):
+        """Executes the  deafen command."""
         if member.voice is None:
             embed = discord.Embed(title=f"{CROSS} Error",
 
@@ -327,6 +333,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def _undeafen(self, ctx, *, member: discord.Member):
+        """Executes the  undeafen command."""
         if member.voice is None:
             embed = discord.Embed(title=f"{CROSS} Error",
 
@@ -369,6 +376,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def _deafenall(self, ctx):
+        """Executes the  deafenall command."""
         if ctx.author.voice is None:
             embed = discord.Embed(title=f"{CROSS} Error",
 
@@ -406,6 +414,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def _undeafall(self, ctx):
+        """Executes the  undeafall command."""
         if ctx.author.voice is None:
             embed = discord.Embed(title=f"{CROSS} Error",
 
@@ -444,6 +453,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def _moveall(self, ctx, *, channel: discord.VoiceChannel):
+        """Executes the  moveall command."""
         if ctx.author.voice is None:
             embed = discord.Embed(title=f"{CROSS} Error",
 
@@ -494,6 +504,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def _pullall(self, ctx, *, channel: discord.VoiceChannel):
+        """Executes the  pullall command."""
         if ctx.author.voice is None:
             embed = discord.Embed(title=f"{CROSS} Error",
 
@@ -534,6 +545,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def _move(self, ctx, member: discord.Member, channel: discord.VoiceChannel):
+        """Executes the  move command."""
         if member.voice is None:
             embed = discord.Embed(title=f"{CROSS}Error",
 
@@ -576,6 +588,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def _pull(self, ctx, member: discord.Member):
+        """Executes the  pull command."""
         if ctx.author.voice is None:
             embed = discord.Embed(title=f"{CROSS} Error",
 
@@ -627,6 +640,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def _lock(self, ctx):
+        """Executes the  lock command."""
         if ctx.author.voice is None:
             embed = discord.Embed(title=f"{CROSS} Error",
 
@@ -660,6 +674,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def _unlock(self, ctx):
+        """Executes the  unlock command."""
         if ctx.author.voice is None:
             embed = discord.Embed(title=f"{CROSS} Error",
 
@@ -693,6 +708,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def _private(self, ctx):
+        """Executes the  private command."""
         if ctx.author.voice is None:
             embed = discord.Embed(title=f"{CROSS} Error",
 
@@ -727,6 +743,7 @@ class Voice(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     async def _unprivate(self, ctx):
+        """Executes the  unprivate command."""
         if ctx.author.voice is None:
             embed = discord.Embed(title=f"{CROSS} Error",
 

@@ -4,18 +4,15 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
 from utils.emoji import CROSS, TICK
 from discord.ext import commands
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import asyncio
 from utils.config import *
 
@@ -59,6 +56,7 @@ class TopCheck(commands.Cog):
         invoke_without_command=True)
     @commands.guild_only()
     async def topcheck(self, ctx):
+        """Executes the topcheck command."""
         embed = discord.Embed(title="Top Check System",
                               description=(
         "This system ensures that the bot’s role is positioned higher than the user’s top role before executing specific commands.\n\n"
@@ -83,6 +81,7 @@ class TopCheck(commands.Cog):
         help="Enable topcheck for the guild")
     @commands.guild_only()
     async def topcheck_enable(self, ctx):
+        """Executes the topcheck enable command."""
         if ctx.author.id != ctx.guild.owner_id:
             return await ctx.reply(f"{CROSS} Only the **Server Owner** can enable topcheck.")
         if await self.is_topcheck_enabled(ctx.guild.id):
@@ -95,6 +94,7 @@ class TopCheck(commands.Cog):
         help="Disable topcheck for the guild")
     @commands.guild_only()
     async def topcheck_disable(self, ctx):
+        """Executes the topcheck disable command."""
         if ctx.author.id != ctx.guild.owner_id:
             return await ctx.reply("Only the **Server Owner** can disable topcheck.")
         if not await self.is_topcheck_enabled(ctx.guild.id):

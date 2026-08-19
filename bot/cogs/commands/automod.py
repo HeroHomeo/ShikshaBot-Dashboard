@@ -4,18 +4,15 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
 from utils.emoji import CROSS, DISABLE, ENABLE, TICK, TICK_ALT
 from discord.ext import commands
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 from utils.Tools import *
 from utils.cv2 import CV2, build_container
 from discord.ui import LayoutView, TextDisplay, Separator, Container, ActionRow
@@ -188,6 +185,8 @@ class Automod(commands.Cog):
     @ignore_check()
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def automod(self, ctx):
+        """
+Executes the automod command."""
         if ctx.subcommand_passed is None:
             await ctx.send_help(ctx.command)
             ctx.command.reset_cooldown(ctx)
@@ -218,6 +217,7 @@ class Automod(commands.Cog):
             "Anti mass mention",
             "Anti emoji spam",
             "Anti NSFW link",
+            "Anti profanity",
         ]
 
         select_menu = discord.ui.Select(placeholder="Select events to enable", min_values=1, max_values=len(events), options=[
@@ -807,6 +807,7 @@ class Automod(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
+        """Executes the on guild remove command."""
         guild_id = guild.id
 
         async with aiosqlite.connect("db/automod.db") as db:

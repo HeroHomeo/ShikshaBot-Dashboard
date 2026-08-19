@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -56,6 +53,8 @@ class ImageCommands(commands.Cog):
 
     @commands.command(name="boy")
     async def boy_image(self, ctx):
+        """
+Executes the boy image command."""
         url = await self.fetch_pexels_image("handsome boy")
         await self.send_image_view(ctx, "👦 Boy Pic", url)
 
@@ -66,11 +65,15 @@ class ImageCommands(commands.Cog):
 
     @commands.command(name="couple")
     async def couple_image(self, ctx):
+        """
+Executes the couple image command."""
         url = await self.fetch_pexels_image("romantic couple")
         await self.send_image_view(ctx, "💑 Couple Pic", url)
 
     @commands.command(name="anime")
     async def anime_image(self, ctx):
+        """
+Executes the anime image command."""
         url = await self.fetch_waifu_image("waifu")
         await self.send_image_view(ctx, "🧚 Anime Waifu", url)
 

@@ -1,20 +1,6 @@
-# ╔══════════════════════════════════════════════════════════════════╗
-# ║                                                                  ║
-# ║   ░█▀▀░█▀█░█▀▄░█▀▀░█░█   ░█▀▄░█▀▀░█░█░█▀▀                     ║
-# ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
-# ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
-# ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
-# ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
-# ║                                                                  ║
-# ╚══════════════════════════════════════════════════════════════════╝
-
 import discord
 from discord.ext import commands, tasks
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import aiohttp
 import os
 from utils.Tools import *
@@ -53,12 +39,15 @@ class VanityRoles(commands.Cog):
     @blacklist_check()
     @ignore_check()
     async def vanityroles(self, ctx):
+        """
+Executes the vanityroles command."""
         await ctx.send("❗ Usage: `vanityroles setup <vanity> <@role> <#channel>`, `vanityroles show`, `vanityroles reset`")
 
     @vanityroles.command(name="setup")
     @blacklist_check()
     @ignore_check()
     async def setup(self, ctx, vanity: str, role: discord.Role, channel: discord.TextChannel):
+        """Executes the setup command."""
         async with aiosqlite.connect(DB_PATH) as db:
             await db.execute("""
                 INSERT OR REPLACE INTO vanity_roles (guild_id, vanity, role_id, log_channel_id, current_status)
@@ -76,6 +65,7 @@ class VanityRoles(commands.Cog):
     @blacklist_check()
     @ignore_check()
     async def show(self, ctx):
+        """Executes the show command."""
         async with aiosqlite.connect(DB_PATH) as db:
             async with db.execute("SELECT vanity, role_id, log_channel_id FROM vanity_roles WHERE guild_id = ?", (ctx.guild.id,)) as cursor:
                 rows = await cursor.fetchall()
@@ -98,6 +88,7 @@ class VanityRoles(commands.Cog):
     @blacklist_check()
     @ignore_check()
     async def reset(self, ctx):
+        """Executes the reset command."""
         async with aiosqlite.connect(DB_PATH) as db:
             await db.execute("DELETE FROM vanity_roles WHERE guild_id = ?", (ctx.guild.id,))
             await db.commit()

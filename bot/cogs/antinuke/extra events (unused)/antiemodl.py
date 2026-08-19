@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import asyncio
 import random
 import datetime
@@ -28,6 +28,7 @@ class AntiEmojiDelete(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_emojis_update(self, guild, before, after):
+        """Executes the on guild emojis update command."""
         if len(after) < len(before):
             async with aiosqlite.connect('db/anti.db') as db:
                 async with db.execute("SELECT status FROM antinuke WHERE guild_id = ?", (guild.id,)) as cursor:

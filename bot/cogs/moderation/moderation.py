@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -21,7 +18,7 @@ import typing
 import typing as t
 from typing import *
 from utils.Tools import *
-from core import Cog, zyrox, Context
+from core import Cog, shikshabot, Context
 from discord.ext.commands import Converter
 from discord.ext import commands, tasks
 from discord.ui import Button, View
@@ -33,7 +30,7 @@ import requests
 import aiohttp
 import time
 from datetime import datetime, timezone, timedelta
-import sqlite3
+from db import sqlite3_mock as sqlite3
 from typing import *
 from discord.utils import utcnow
 
@@ -121,6 +118,8 @@ class Moderation(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def enlarge(self, ctx,  emoji: Union[discord.Emoji, discord.PartialEmoji, str]):
+    """
+Executes the enlarge command."""
     url = emoji.url
     await ctx.send(url)
 
@@ -137,6 +136,7 @@ class Moderation(commands.Cog):
   @commands.has_permissions(administrator=True)
   @commands.cooldown(1, 15, commands.BucketType.channel)
   async def unlockall(self, ctx):
+      """Executes the unlockall command."""
       if ctx.author == ctx.guild.owner or ctx.author.top_role.position > ctx.guild.me.top_role.position:
           button = Button(label="Confirm",
                     style=discord.ButtonStyle.green,
@@ -222,6 +222,7 @@ class Moderation(commands.Cog):
   @commands.has_permissions(administrator=True)
   @commands.cooldown(1, 15, commands.BucketType.channel)
   async def lockall(self, ctx):
+      """Executes the lockall command."""
       if ctx.author == ctx.guild.owner or ctx.author.top_role.position > ctx.guild.me.top_role.position:
           button = Button(label="Confirm",
                     style=discord.ButtonStyle.green,
@@ -306,6 +307,7 @@ class Moderation(commands.Cog):
   @commands.has_permissions(manage_roles=True)
   @commands.bot_has_permissions(manage_roles= True)
   async def give(self, ctx, member: discord.Member, *, role: discord.Role):
+    """Executes the give command."""
     if not ctx.guild.me.guild_permissions.manage_roles:
         return await ctx.send(f"{DENIED} I don't have permission to manage roles!")
 
@@ -374,6 +376,7 @@ class Moderation(commands.Cog):
   @commands.has_permissions(administrator=True)
   @commands.cooldown(1, 15, commands.BucketType.channel)
   async def hideall(self, ctx):
+      """Executes the hideall command."""
       if ctx.author == ctx.guild.owner or ctx.author.top_role.position > ctx.guild.me.top_role.position:
           button = Button(label="Confirm",
                     style=discord.ButtonStyle.green,
@@ -452,6 +455,7 @@ class Moderation(commands.Cog):
   @commands.has_permissions(administrator=True)
   @commands.cooldown(1, 15, commands.BucketType.channel)
   async def unhideall(self, ctx):
+      """Executes the unhideall command."""
       if ctx.author == ctx.guild.owner or ctx.author.top_role.position > ctx.guild.me.top_role.position:
           button = Button(label="Confirm",
                     style=discord.ButtonStyle.green,
@@ -535,6 +539,7 @@ class Moderation(commands.Cog):
   @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
   @commands.guild_only()
   async def _prefix(self, ctx: commands.Context, prefix: str):
+      """Executes the  prefix command."""
       if not prefix:
           await ctx.reply(embed=discord.Embed(title=f"{CROSS} Error",
                 description="Prefix cannot be empty. Please provide a valid prefix.",
@@ -614,6 +619,7 @@ class Moderation(commands.Cog):
   @commands.has_permissions(manage_nicknames=True)
   @commands.bot_has_permissions(manage_nicknames=True)
   async def changenickname(self, ctx: commands.Context, member: discord.Member, *, name: str = None):
+    """Executes the changenickname command."""
     
     
     if member == ctx.guild.owner:
@@ -754,6 +760,7 @@ class Moderation(commands.Cog):
   @commands.cooldown(1, 2, commands.BucketType.user)
   @commands.has_permissions(manage_messages=True)
   async def _slowmode(self, ctx: commands.Context, seconds: int = 0):
+    """Executes the  slowmode command."""
     if seconds > 120:
       embed=discord.Embed(description="Slowmode can not be over 2 minutes",
                             color=self.color)
@@ -785,6 +792,7 @@ class Moderation(commands.Cog):
   @commands.has_permissions(manage_messages=True)
   @commands.bot_has_permissions(manage_messages=True)
   async def _unslowmode(self, ctx: commands.Context):
+    """Executes the  unslowmode command."""
     await ctx.channel.edit(slowmode_delay=0)
     embed=discord.Embed(description="Successfully Disabled slowmode", color=self.color)
     embed.set_author(name="Unslowmode", icon_url="https://cdn.discordapp.com/avatars/1396114795102470196/198b9bc616ec574f6fd2f7121a1d3abc.png?size=1024")
@@ -989,6 +997,7 @@ class Moderation(commands.Cog):
   @commands.guild_only()
   @commands.has_permissions(ban_members=True)
   async def unbanall(self, ctx):
+    """Executes the unbanall command."""
     button = Button(label="Confirm",
                     style=discord.ButtonStyle.green,
                     emoji=f"{TICK}>")
@@ -1052,6 +1061,7 @@ class Moderation(commands.Cog):
   @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
   @commands.guild_only()
   async def auditlog(self, ctx, limit: int):
+    """Executes the auditlog command."""
     if limit >= 31:
       await ctx.reply(
         "Action rejected, you are not allowed to fetch more than `30` entries.",
@@ -1060,7 +1070,8 @@ class Moderation(commands.Cog):
     idk = []
     str = ""
     async for entry in ctx.guild.audit_logs(limit=limit):
-      idk.append(f'''User: `{entry.user}`
+      idk.append(f'''
+User: `{entry.user}`
 Action: `{entry.action}`
 Target: `{entry.target}`
 Reason: `{entry.reason}`\n\n''')

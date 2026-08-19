@@ -4,18 +4,15 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 from __future__ import annotations
 import discord
 from utils.emoji import CROSS, ICONS_WARNING, TICK
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import logging
 from discord.ext import commands
 from typing import List, Dict
@@ -97,6 +94,8 @@ class AutoRole(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def _autorole(self, ctx):
+        """
+Executes the  autorole command."""
         if ctx.subcommand_passed is None:
             await ctx.send_help(ctx.command)
             ctx.command.reset_cooldown(ctx)

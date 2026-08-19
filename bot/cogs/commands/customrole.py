@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -17,7 +14,7 @@ from utils.emoji import CROSS, TICK, ZWARNING
 from discord import app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import asyncio
 from utils.Tools import *
 from utils.cv2 import CV2, build_container
@@ -142,6 +139,7 @@ class Customrole(commands.Cog):
     @commands.cooldown(1, 3, commands.BucketType.user)
     @commands.has_permissions(administrator=True)
     async def set(self, context: Context):
+        """Executes the set command."""
         if context.subcommand_passed is None:
             await context.send_help(context.command)
             context.command.reset_cooldown(context)
@@ -179,6 +177,7 @@ class Customrole(commands.Cog):
     @commands.has_permissions(administrator=True)
     @app_commands.describe(role="Role to be added")
     async def staff(self, context: Context, role: discord.Role) -> None:
+        """Executes the staff command."""
         if context.author == context.guild.owner or context.author.top_role.position > context.guild.me.top_role.position:
             await self.update_role_data(context.guild.id, 'staff', role.id)
             await context.reply(view=CV2(f"{TICK} Success", f"Added {role.mention} to `Staff` Role\n\n__**How to Use?**__\nUse `staff <user>` Command to **Add {role.mention}** role to User & use again to the same user to **Remove role**."))
@@ -194,6 +193,7 @@ class Customrole(commands.Cog):
     @commands.has_permissions(administrator=True)
     @app_commands.describe(role="Role to be added")
     async def girl(self, context: Context, role: discord.Role) -> None:
+        """Executes the girl command."""
         if context.author == context.guild.owner or context.author.top_role.position > context.guild.me.top_role.position:
             await self.update_role_data(context.guild.id, 'girl', role.id)
             await context.reply(view=CV2(f"{TICK} Success", f"Added {role.mention} to `Girl` Role\n\n__**How to Use?**__\nUse `girl <user>` Command to **Add {role.mention}** role to User & use again to the same user to **Remove role**."))
@@ -209,6 +209,7 @@ class Customrole(commands.Cog):
     @commands.has_permissions(administrator=True)
     @app_commands.describe(role="Role to be added")
     async def vip(self, context: Context, role: discord.Role) -> None:
+        """Executes the vip command."""
         if context.author == context.guild.owner or context.author.top_role.position > context.guild.me.top_role.position:
             await self.update_role_data(context.guild.id, 'vip', role.id)
             await context.reply(view=CV2(f"{TICK} Success", f"Added {role.mention} to `VIP` Role\n\n__**How to Use?**__\nUse `vip <user>` Command to **Add {role.mention}** role to User & use again to the same user to **Remove role**."))
@@ -224,6 +225,7 @@ class Customrole(commands.Cog):
     @commands.has_permissions(administrator=True)
     @app_commands.describe(role="Role to be added")
     async def guest(self, context: Context, role: discord.Role) -> None:
+        """Executes the guest command."""
         if context.author == context.guild.owner or context.author.top_role.position > context.guild.me.top_role.position:
             await self.update_role_data(context.guild.id, 'guest', role.id)
             await context.reply(view=CV2(f"{TICK} Success", f"Added {role.mention} to `Guest` Role\n\n__**How to Use?**__\nUse `guest <user>` Command to **Add {role.mention}** role to User & use again to the same user to **Remove role**."))
@@ -239,6 +241,7 @@ class Customrole(commands.Cog):
     @commands.has_permissions(administrator=True)
     @app_commands.describe(role="Role to be added")
     async def friend(self, context: Context, role: discord.Role) -> None:
+        """Executes the friend command."""
         if context.author == context.guild.owner or context.author.top_role.position > context.guild.me.top_role.position:
             await self.update_role_data(context.guild.id, 'frnd', role.id)
             await context.reply(view=CV2(f"{TICK} Success", f"Added {role.mention} to `Friend` Role\n\n__**How to Use?**__\nUse `friend <user>` Command to **Add {role.mention}** role to User & use again to the same user to **Remove role**."))
@@ -254,6 +257,7 @@ class Customrole(commands.Cog):
     @commands.has_permissions(administrator=True)
     @app_commands.describe(role="Role to be added")
     async def req_role(self, context: Context, role: discord.Role) -> None:
+        """Executes the req role command."""
         if context.author == context.guild.owner or context.author.top_role.position > context.guild.me.top_role.position:
             await self.update_role_data(context.guild.id, 'reqrole', role.id)
             await context.reply(view=CV2(f"{TICK} Success", f"Added {role.mention} for Required role to run custom role commands in {context.guild.name}"))
@@ -270,6 +274,7 @@ class Customrole(commands.Cog):
     @commands.cooldown(1, 3, commands.BucketType.user)
     @commands.has_permissions(administrator=True)
     async def config(self, context: Context) -> None:
+        """Executes the config command."""
         role_data = await self.fetch_role_data(context.guild.id)
         if role_data:
             staff = context.guild.get_role(role_data[0]).mention if role_data[0] else "None"
@@ -305,6 +310,7 @@ class Customrole(commands.Cog):
     @commands.has_permissions(administrator=True)
     @app_commands.describe(name="Command name", role="Role to be assigned")
     async def create(self, context: Context, name: str, role: discord.Role) -> None:
+        """Executes the create command."""
         async with aiosqlite.connect(DATABASE_PATH) as db:
             async with db.execute("SELECT COUNT(*) FROM custom_roles WHERE guild_id = ?", (context.guild.id,)) as cursor:
                 count = await cursor.fetchone()
@@ -334,6 +340,7 @@ class Customrole(commands.Cog):
     @commands.has_permissions(administrator=True)
     @app_commands.describe(name="Command name to be deleted")
     async def delete(self, context: Context, name: str) -> None:
+        """Executes the delete command."""
         async with aiosqlite.connect(DATABASE_PATH) as db:
             async with db.execute("SELECT name FROM custom_roles WHERE guild_id = ? AND name = ?", (context.guild.id, name)) as cursor:
                 existing_role = await cursor.fetchone()
@@ -359,6 +366,7 @@ class Customrole(commands.Cog):
     @commands.cooldown(1, 3, commands.BucketType.user)
     @commands.has_permissions(administrator=True)
     async def list(self, context: Context) -> None:
+        """Executes the list command."""
         custom_roles = await self.fetch_custom_role_data(context.guild.id)
 
         if not custom_roles:
@@ -367,7 +375,8 @@ class Customrole(commands.Cog):
 
         
         def chunk_list(data: List[Tuple[str, int]], chunk_size: int):
-            """Yield successive chunks of `chunk_size` from `data`."""
+            """
+Yield successive chunks of `chunk_size` from `data`."""
             for i in range(0, len(data), chunk_size):
                 yield data[i:i + chunk_size]
 
@@ -392,6 +401,7 @@ class Customrole(commands.Cog):
     @commands.cooldown(1, 4, commands.BucketType.user)
     @commands.has_permissions(administrator=True)
     async def reset(self, context: Context) -> None:
+        """Executes the reset command."""
         if context.author == context.guild.owner or context.author.top_role.position > context.guild.me.top_role.position:
             removed_roles = []
             role_data = await self.fetch_role_data(context.guild.id)
@@ -420,6 +430,7 @@ class Customrole(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
+        """Executes the on message command."""
 
         if message.author.bot or not message.content:
             return

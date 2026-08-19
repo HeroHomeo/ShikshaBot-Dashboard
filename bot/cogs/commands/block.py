@@ -4,18 +4,15 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
 from utils.emoji import CROSS, TICK
 from discord.ext import commands
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 from utils import Paginator, DescriptionEmbedPaginator
 from discord.ui import LayoutView, TextDisplay, Separator, Container
 from utils.cv2 import CV2, build_container
@@ -57,6 +54,8 @@ class Block(commands.Cog):
   @commands.group(name="blacklist", aliases=["bl"], invoke_without_command=True)
   @commands.is_owner()
   async def blacklist(self, ctx):
+    """
+Executes the blacklist command."""
     if ctx.subcommand_passed is None:
       ctx.command.reset_cooldown(ctx)
       await ctx.send_help(ctx.command)
@@ -109,7 +108,7 @@ class Block(commands.Cog):
           user = await self.bot.fetch_user(user_id)
           username = user.name
           user_link = f"https://discord.com/users/{user_id}"
-          #indexx = [""for index, user in enumerate(blacklist)]
+          #indexx = [f"{index}. {user}" for index, user in enumerate(blacklist)]
 
           blacklist.append(f"**[{username}]({user_link})** - ({user_id})")
         except discord.NotFound:

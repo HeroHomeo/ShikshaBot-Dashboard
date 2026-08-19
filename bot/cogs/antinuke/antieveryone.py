@@ -4,17 +4,14 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
 from discord.ext import commands
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import asyncio
 import datetime
 from datetime import timedelta
@@ -39,6 +36,7 @@ class AntiEveryone(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        """Executes the on message command."""
         if message.guild is None or not message.mention_everyone:
             return
 

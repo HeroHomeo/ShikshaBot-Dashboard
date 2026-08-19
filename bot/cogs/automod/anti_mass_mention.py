@@ -4,18 +4,15 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
 from utils.emoji import TICK
 from discord.ext import commands
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 from datetime import timedelta
 import asyncio
 
@@ -74,6 +71,7 @@ class AntiMassMention(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        """Executes the on message command."""
         if message.author.bot:
             return
 
@@ -133,5 +131,6 @@ class AntiMassMention(commands.Cog):
 
     @commands.Cog.listener()
     async def on_rate_limit(self, message):
+        """Executes the on rate limit command."""
         await asyncio.sleep(10)
 

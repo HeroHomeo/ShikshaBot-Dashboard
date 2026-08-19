@@ -4,17 +4,14 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
 from discord.ext import commands
-import sqlite3
+from db import sqlite3_mock as sqlite3
 import asyncio
 import os
 
@@ -39,6 +36,8 @@ class FastGreet(commands.Cog):
     @commands.command(name="fastgreet_add")
     @commands.has_permissions(administrator=True)
     async def add_greet_channel(self, ctx, channel: discord.TextChannel):
+        """
+Executes the add greet channel command."""
         with sqlite3.connect(DB_PATH) as conn:
             conn.execute("""
                 INSERT OR IGNORE INTO greet_channels (guild_id, channel_id)
@@ -49,6 +48,8 @@ class FastGreet(commands.Cog):
     @commands.command(name="fastgreet_remove")
     @commands.has_permissions(administrator=True)
     async def remove_greet_channel(self, ctx, channel: discord.TextChannel):
+        """
+Executes the remove greet channel command."""
         with sqlite3.connect(DB_PATH) as conn:
             conn.execute("""
                 DELETE FROM greet_channels WHERE guild_id = ? AND channel_id = ?
@@ -57,6 +58,8 @@ class FastGreet(commands.Cog):
 
     @commands.command(name="fastgreet_list")
     async def list_greet_channels(self, ctx):
+        """
+Executes the list greet channels command."""
         with sqlite3.connect(DB_PATH) as conn:
             cursor = conn.execute("""
                 SELECT channel_id FROM greet_channels WHERE guild_id = ?
@@ -72,6 +75,7 @@ class FastGreet(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
+        """Executes the on member join command."""
         with sqlite3.connect(DB_PATH) as conn:
             cursor = conn.execute("""
                 SELECT channel_id FROM greet_channels WHERE guild_id = ?

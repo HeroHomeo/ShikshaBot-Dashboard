@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -124,7 +121,8 @@ class calculator(commands.Cog):
 
     @commands.command(name='calculator', help='Starts a calculator session', aliases=['calc', 'calculate', 'math'])
     async def calculator(self, ctx):
-        """Starts a new calculator session."""
+        """
+Starts a new calculator session."""
         # Ensure we pass the author to the view so it knows who triggered it
         view = CalculatorView(author=ctx.author)
         # We store the message so we know what to edit and update later

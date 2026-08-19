@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -17,7 +14,7 @@ from utils.emoji import CROSS, TICK
 from discord.ext import commands
 from discord.ext.commands import Context
 from discord import app_commands
-import sqlite3
+from db import sqlite3_mock as sqlite3
 
 class ReactionRoles(commands.Cog):
     def __init__(self, bot):
@@ -94,6 +91,7 @@ class ReactionRoles(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
+        """Executes the on raw reaction add command."""
         if payload.guild_id is None or payload.member.bot:
             return
 
@@ -124,6 +122,7 @@ class ReactionRoles(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
+        """Executes the on raw reaction remove command."""
         if payload.guild_id is None:
             return
 

@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -40,6 +37,8 @@ class joindm(commands.Cog):
     @commands.group(invoke_without_command=True)
     @commands.has_permissions(administrator=True)
     async def joindm(self, ctx):
+        """
+Executes the joindm command."""
         # Display the current join DM message
         guild_id = str(ctx.guild.id)
         if guild_id in self.joindm_messages:
@@ -50,7 +49,7 @@ class joindm(commands.Cog):
     @joindm.command()
     @commands.has_permissions(administrator=True)
     async def message(self, ctx, *, message=None):
-        # Set the custom join DM message
+        """Sets the custom join DM message that gets sent to new members."""
         if message is None:
             await ctx.send(view=CV2("❌ Error", "Please provide a custom join DM message."))
         else:
@@ -61,20 +60,20 @@ class joindm(commands.Cog):
     @joindm.command()
     @commands.has_permissions(administrator=True)
     async def enable(self, ctx):
-        # Enable the join DM module
+        """Enables the join DM module to start messaging new members."""
         self.bot.add_listener(self.on_member_join, 'on_member_join')
         await ctx.send(view=CV2("✅ Success", "Join DM module enabled. Custom DM will be sent to new members."))
 
     @joindm.command()
     @commands.has_permissions(administrator=True)
     async def disable(self, ctx):
-        # Disable the join DM module
+        """Disables the join DM module."""
         self.bot.remove_listener(self.on_member_join)
         await ctx.send(view=CV2("✅ Success", "Join DM module disabled. Custom DM will not be sent to new members."))
 
     @joindm.command()
     async def test(self, ctx):
-        # Send a test join DM to the author of the command
+        """Sends a test join DM to you so you can preview the message."""
         guild_id = str(ctx.guild.id)
         if guild_id in self.joindm_messages:
             message = self.joindm_messages[guild_id]

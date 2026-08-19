@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -16,7 +13,7 @@ import discord
 from utils.emoji import DELETE, TICK
 from discord.ext import commands
 from discord import ui
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import asyncio
 from utils.Tools import *
 
@@ -168,6 +165,7 @@ class Warn(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
     async def clearwarns(self, ctx, user: discord.Member):
+        """Executes the clearwarns command."""
         try:
             await self.reset_warns(ctx.guild.id, user.id)
             embed = discord.Embed(description=f"{TICK} | All warnings have been cleared for **{user}** in this guild.", color=self.color)

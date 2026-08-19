@@ -4,17 +4,14 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
 from discord.ext import commands
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import asyncio
 import datetime
 import pytz
@@ -64,6 +61,7 @@ class AntiWebhookCreate(commands.Cog):
 
     @commands.Cog.listener()
     async def on_webhooks_create(self, channel):
+        """Executes the on webhooks create command."""
         guild = channel.guild
         if await self.is_blacklisted_guild(guild.id):
             return

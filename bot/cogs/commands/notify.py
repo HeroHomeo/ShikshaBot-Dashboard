@@ -4,17 +4,14 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
 from discord.ext import commands
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 from utils.Tools import *
 from utils.cv2 import CV2
 
@@ -27,7 +24,8 @@ class NotifCommands(commands.Cog):
 
     async def setup_db(self):
         async with aiosqlite.connect(self.db_path) as db:
-            await db.execute("""CREATE TABLE IF NOT EXISTS notifications (
+            await db.execute("""
+CREATE TABLE IF NOT EXISTS notifications (
                                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                                 type TEXT NOT NULL UNIQUE,
                                 role_id INTEGER NOT NULL,
@@ -36,6 +34,8 @@ class NotifCommands(commands.Cog):
 
     @commands.group(invoke_without_command=True)
     async def setnotif(self, ctx):
+        """
+Executes the setnotif command."""
         view = CV2(
             "Notification Commands",
             "Subcommands: twitch, youtube, list, reset",
@@ -47,6 +47,7 @@ class NotifCommands(commands.Cog):
     @ignore_check()
     @commands.has_permissions(administrator=True)
     async def twitch(self, ctx, role: discord.Role, channel: discord.TextChannel):
+        """Executes the twitch command."""
         async with aiosqlite.connect(self.db_path) as db:
             async with db.execute(
                 "SELECT * FROM notifications WHERE type = ?", ("twitch",)
@@ -76,6 +77,7 @@ class NotifCommands(commands.Cog):
     @ignore_check()
     @commands.has_permissions(administrator=True)
     async def youtube(self, ctx, role: discord.Role, channel: discord.TextChannel):
+        """Executes the youtube command."""
         async with aiosqlite.connect(self.db_path) as db:
             async with db.execute(
                 "SELECT * FROM notifications WHERE type = ?", ("youtube",)
@@ -102,6 +104,7 @@ class NotifCommands(commands.Cog):
 
     @setnotif.command()
     async def list(self, ctx):
+        """Executes the list command."""
         async with aiosqlite.connect(self.db_path) as db:
             async with db.execute("SELECT * FROM notifications") as cursor:
                 rows = await cursor.fetchall()
@@ -135,6 +138,7 @@ class NotifCommands(commands.Cog):
 
     @setnotif.command()
     async def reset(self, ctx):
+        """Executes the reset command."""
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
                 "DELETE FROM notifications WHERE type IN (?, ?)", ("twitch", "youtube")
@@ -148,6 +152,7 @@ class NotifCommands(commands.Cog):
 
     @commands.Cog.listener()
     async def on_presence_update(self, before, after):
+        """Executes the on presence update command."""
 
         streaming = next(
             (

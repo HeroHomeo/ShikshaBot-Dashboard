@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -31,18 +28,18 @@ from api.schemas import (
 )
 from typing import TYPE_CHECKING, List, Optional
 import math
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import json
 import os
 
 if TYPE_CHECKING:
-    from core.zyrox import zyrox
+    from core.shikshabot import shikshabot
 
 router = APIRouter()
 
 
 @router.get("/", response_model=List[GuildSummary], summary="List all guilds", description="Returns a summary of all guilds the bot is currently in.")
-async def list_guilds(bot: "zyrox" = Depends(get_bot)):
+async def list_guilds(bot: "shikshabot" = Depends(get_bot)):
     """
     Lists detailed information about all guilds the bot is currently in.
     """
@@ -58,7 +55,7 @@ async def list_guilds(bot: "zyrox" = Depends(get_bot)):
     return guilds_list
 
 @router.get("/{guild_id}", response_model=GuildDetails, summary="Get guild details", description="Returns detailed metrics and metadata for a specific Discord guild.")
-async def get_guild_details(guild_id: int, bot: "zyrox" = Depends(get_bot)):
+async def get_guild_details(guild_id: int, bot: "shikshabot" = Depends(get_bot)):
     """
     Returns detailed info for a specific guild by its ID.
     """
@@ -132,13 +129,19 @@ async def get_guild_automod(guild_id: int):
     logging_row = await cursor.fetchone()
     logging_channel = logging_row[0] if logging_row else None
 
+    # Get blacklist words
+    db_blword = await db_manager.get_connection('db/blword.db')
+    cursor = await db_blword.execute("SELECT word FROM blacklist WHERE guild_id = ?", (str(guild_id),))
+    blacklist_words = [row[0] for row in await cursor.fetchall()]
+
     return AutomodConfig(
         guild_id=guild_id,
         enabled=enabled,
         punishments=punishments,
         ignored_roles=ignored_roles,
         ignored_channels=ignored_channels,
-        logging_channel=logging_channel
+        logging_channel=logging_channel,
+        blacklist_words=blacklist_words
     )
 
 @router.patch("/{guild_id}/automod", summary="Update AutoMod config", description="Partially updates the AutoMod configuration components.")
@@ -183,6 +186,13 @@ async def patch_guild_automod(guild_id: int, data: AutomodUpdate):
         )
 
     await db.commit()
+
+    if data.blacklist_words is not None:
+        db_blword = await db_manager.get_connection('db/blword.db')
+        await db_blword.execute("DELETE FROM blacklist WHERE guild_id = ?", (str(guild_id),))
+        for word in data.blacklist_words:
+            await db_blword.execute("INSERT INTO blacklist (guild_id, word) VALUES (?, ?)", (str(guild_id), word))
+        await db_blword.commit()
     
     return {"status": "success", "guild_id": guild_id}
 
@@ -222,7 +232,7 @@ async def get_guild_tickets(guild_id: int):
             emoji=row["emoji"],
             staff_roles=category_roles,
             button_style=row["button_style"],
-            discord_category_id=row["discord_category_id"]
+            discord_category_id=str(row["discord_category_id"]) if row["discord_category_id"] else None
         ))
 
     # Get open ticket count
@@ -235,10 +245,10 @@ async def get_guild_tickets(guild_id: int):
 
     return TicketConfig(
         guild_id=guild_id,
-        panel_channel=config_row["panel_channel_id"] if config_row else None,
-        panel_message=config_row["panel_message_id"] if config_row else None,
-        logging_channel=config_row["logging_channel_id"] if config_row else None,
-        closed_category=config_row["closed_category_id"] if config_row else None,
+        panel_channel=str(config_row["panel_channel_id"]) if config_row and config_row["panel_channel_id"] else None,
+        panel_message=str(config_row["panel_message_id"]) if config_row and config_row["panel_message_id"] else None,
+        logging_channel=str(config_row["logging_channel_id"]) if config_row and config_row["logging_channel_id"] else None,
+        closed_category=str(config_row["closed_category_id"]) if config_row and config_row["closed_category_id"] else None,
         panel_type=config_row["panel_type"] if config_row else "button",
         embed=TicketEmbed(
             title=config_row["embed_title"] if config_row else "Support Department",
@@ -291,9 +301,9 @@ async def patch_guild_tickets(guild_id: int, data: TicketUpdate):
     if data.embed_thumbnail_url is not None:
         await db.execute("UPDATE guild_configs SET embed_thumbnail_url = ? WHERE guild_id = ?", (data.embed_thumbnail_url, guild_id))
 
-    if data.staff_roles is not None:
-        roles_str = ",".join(map(str, data.staff_roles))
-        await db.execute("UPDATE guild_configs SET staff_roles = ? WHERE guild_id = ?", (roles_str, guild_id))
+    # if data.staff_roles is not None:
+    #     roles_str = ",".join(map(str, data.staff_roles))
+    #     await db.execute("UPDATE guild_configs SET staff_roles = ? WHERE guild_id = ?", (roles_str, guild_id))
 
     if data.categories is not None:
         # Clear existing categories
@@ -416,7 +426,7 @@ async def get_guild_welcome(guild_id: int):
         guild_id=guild_id,
         welcome_type=welcome_type,
         welcome_message=welcome_message,
-        channel_id=channel_id,
+        channel_id=str(channel_id) if channel_id else None,
         embed_data=embed_parsed,
         auto_delete_duration=auto_delete_duration
     )
@@ -690,73 +700,6 @@ async def patch_guild_autorole(guild_id: int, data: AutoRoleUpdate):
     return {"status": "success"}
 
 
-@router.get("/{guild_id}/welcome", response_model=WelcomeConfig, summary="Get Welcome config")
-async def get_guild_welcome(guild_id: int):
-    import aiosqlite
-    import json
-    
-    async with aiosqlite.connect("db/welcome.db") as db:
-        async with db.execute("SELECT welcome_type, welcome_message, channel_id, embed_data, auto_delete_duration FROM welcome WHERE guild_id = ?", (guild_id,)) as cursor:
-            row = await cursor.fetchone()
-            
-    if row:
-        w_type, w_msg, channel_id, embed_data_str, auto_del = row
-        edata = None
-        if embed_data_str:
-            try:
-                edata_dict = json.loads(embed_data_str)
-                edata = WelcomeEmbedData(**edata_dict)
-            except:
-                pass
-        return WelcomeConfig(
-            guild_id=guild_id,
-            welcome_type=w_type,
-            welcome_message=w_msg,
-            channel_id=channel_id,
-            embed_data=edata,
-            auto_delete_duration=auto_del
-        )
-        
-    return WelcomeConfig(guild_id=guild_id)
-
-@router.patch("/{guild_id}/welcome", summary="Update Welcome config")
-async def patch_guild_welcome(guild_id: int, data: WelcomeUpdate):
-    import aiosqlite
-    import json
-    
-    async with aiosqlite.connect("db/welcome.db") as db:
-        async with db.execute("SELECT welcome_type, welcome_message, channel_id, embed_data, auto_delete_duration FROM welcome WHERE guild_id = ?", (guild_id,)) as cursor:
-            row = await cursor.fetchone()
-            
-        current_type = row[0] if row else None
-        current_msg = row[1] if row else None
-        current_channel = row[2] if row else None
-        current_embed_str = row[3] if row else None
-        current_auto = row[4] if row else None
-        
-        new_type = data.welcome_type if data.welcome_type is not None else current_type
-        new_msg = data.welcome_message if data.welcome_message is not None else current_msg
-        new_channel = data.channel_id if data.channel_id is not None else current_channel
-        new_auto = data.auto_delete_duration if data.auto_delete_duration is not None else current_auto
-        
-        new_embed_str = current_embed_str
-        if data.embed_data is not None:
-            new_embed_str = data.embed_data.json(exclude_none=True)
-            
-        if not row:
-            await db.execute(
-                "INSERT INTO welcome (guild_id, welcome_type, welcome_message, channel_id, embed_data, auto_delete_duration) VALUES (?, ?, ?, ?, ?, ?)",
-                (guild_id, new_type, new_msg, new_channel, new_embed_str, new_auto)
-            )
-        else:
-            await db.execute(
-                "UPDATE welcome SET welcome_type=?, welcome_message=?, channel_id=?, embed_data=?, auto_delete_duration=? WHERE guild_id=?",
-                (new_type, new_msg, new_channel, new_embed_str, new_auto, guild_id)
-            )
-            
-        await db.commit()
-    return {"status": "success", "guild_id": guild_id}
-
 @router.delete("/{guild_id}/welcome", summary="Delete Welcome config")
 async def delete_guild_welcome(guild_id: int):
     import aiosqlite
@@ -814,7 +757,7 @@ async def get_guild_j2c(guild_id: int):
     return J2CConfig(guild_id=str(guild_id))
 
 @router.patch("/{guild_id}/j2c", summary="Update J2C config")
-async def patch_guild_j2c(guild_id: int, data: J2CUpdate, bot: "zyrox" = Depends(get_bot)):
+async def patch_guild_j2c(guild_id: int, data: J2CUpdate, bot: "shikshabot" = Depends(get_bot)):
     import aiosqlite
     
     def to_id(val):
@@ -994,7 +937,7 @@ async def patch_guild_customroles(guild_id: int, data: CustomRoleUpdate):
     return {"status": "success"}
 
 @router.get("/{guild_id}/logging", response_model=LoggingConfig, summary="Get Logging config", description="Retrieves the event logging configuration and designated log channels.")
-async def get_guild_logging(guild_id: int, bot: "zyrox" = Depends(get_bot)):
+async def get_guild_logging(guild_id: int, bot: "shikshabot" = Depends(get_bot)):
     """
     Retrieves the logging configuration for a specific guild.
     """
@@ -1038,7 +981,7 @@ async def get_guild_logging(guild_id: int, bot: "zyrox" = Depends(get_bot)):
     )
 
 @router.patch("/{guild_id}/logging", summary="Update Logging config", description="Updates which Discord events are logged and where they are posted.")
-async def patch_guild_logging(guild_id: int, data: LoggingUpdate, bot: "zyrox" = Depends(get_bot)):
+async def patch_guild_logging(guild_id: int, data: LoggingUpdate, bot: "shikshabot" = Depends(get_bot)):
     """
     Updates the logging configuration for a specific guild.
     """
@@ -1070,7 +1013,7 @@ async def patch_guild_logging(guild_id: int, data: LoggingUpdate, bot: "zyrox" =
     return {"status": "success", "guild_id": guild_id}
 
 @router.get("/{guild_id}/leveling/leaderboard", response_model=List[LeaderboardEntry], summary="Get leveling leaderboard", description="Returns top users by XP for a specific guild.")
-async def get_leveling_leaderboard(guild_id: int, bot: "zyrox" = Depends(get_bot)):
+async def get_leveling_leaderboard(guild_id: int, bot: "shikshabot" = Depends(get_bot)):
     db = await db_manager.get_connection('db/leveling.db')
     cursor = await db.execute(
         "SELECT user_id, xp FROM user_xp WHERE guild_id = ? ORDER BY xp DESC LIMIT 100", 
@@ -1110,7 +1053,7 @@ async def get_leveling_leaderboard(guild_id: int, bot: "zyrox" = Depends(get_bot
     return leaderboard
 
 @router.get("/{guild_id}/channels", response_model=List[DiscordChannel], summary="Get guild channels", description="Returns a list of all channels for the specific guild.")
-async def get_guild_channels(guild_id: int, bot: "zyrox" = Depends(get_bot)):
+async def get_guild_channels(guild_id: int, bot: "shikshabot" = Depends(get_bot)):
     guild = bot.get_guild(guild_id)
     if not guild:
         raise HTTPException(status_code=404, detail="Guild not found")
@@ -1130,7 +1073,7 @@ async def get_guild_channels(guild_id: int, bot: "zyrox" = Depends(get_bot)):
     return channels
 
 @router.get("/{guild_id}/roles", response_model=List[DiscordRole], summary="Get guild roles", description="Returns a list of roles for the specific guild.")
-async def get_guild_roles(guild_id: int, bot: "zyrox" = Depends(get_bot)):
+async def get_guild_roles(guild_id: int, bot: "shikshabot" = Depends(get_bot)):
     guild = bot.get_guild(guild_id)
     if not guild:
         raise HTTPException(status_code=404, detail="Guild not found")

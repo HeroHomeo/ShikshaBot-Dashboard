@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -32,20 +29,22 @@ class CV2(LayoutView):
         self.add_item(build_container(*items))
 
 def read_db(filename):
-    """Read the JSON database file."""
+    """
+Read the JSON database file."""
     if os.path.exists(filename):
         with open(filename, 'r') as f:
             return json.load(f)
     return {}
 
 def write_db(filename, data):
-    """Write data to the JSON database file."""
+    """
+Write data to the JSON database file."""
     with open(filename, 'w') as f:
         json.dump(data, f, indent=4)
 
 class Birthdays(commands.Cog):
-    """Handle birthday notifications and setup."""
-
+    """
+Handle birthday notifications and setup."""
     def __init__(self, client: commands.Bot):
         self.client = client
         self.check_birthdays.start()
@@ -56,6 +55,7 @@ class Birthdays(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def birthday_setup(self, ctx: commands.Context, channel: discord.TextChannel, role: discord.Role):
+        """Executes the birthday setup command."""
         db = read_db('jsondb/birthday_logs.json')
         guild_id = str(ctx.guild.id)
         
@@ -74,6 +74,7 @@ class Birthdays(commands.Cog):
         help="Set your birthday.")
     @commands.guild_only()
     async def set_birthday(self, ctx: commands.Context):
+        """Executes the set birthday command."""
         def check(msg):
             return msg.author.id == ctx.author.id and msg.channel.id == ctx.channel.id
 
@@ -117,6 +118,7 @@ class Birthdays(commands.Cog):
         help="Remove your birthday.")
     @commands.guild_only()
     async def remove_birthday(self, ctx: commands.Context):
+        """Executes the remove birthday command."""
         db = read_db('jsondb/birthdays.json')
         
         if str(ctx.author.id) in db:
@@ -131,6 +133,7 @@ class Birthdays(commands.Cog):
         help="List all members who have their birthday today.")
     @commands.guild_only()
     async def list_birthdays(self, ctx: commands.Context):
+        """Executes the list birthdays command."""
         now = datetime.datetime.now()
         today_date = now.strftime("%m-%d")
         db = read_db('jsondb/birthdays.json')
@@ -148,6 +151,7 @@ class Birthdays(commands.Cog):
         help="Check your birthday.")
     @commands.guild_only()
     async def check_birthday(self, ctx: commands.Context):
+        """Executes the check birthday command."""
         db = read_db('jsondb/birthdays.json')
         
         if str(ctx.author.id) in db:

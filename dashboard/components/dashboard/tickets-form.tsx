@@ -5,12 +5,9 @@
  * ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
  * ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
  * ║                                                                  ║
- * ║           © 2026 CodeX Devs — All Rights Reserved               ║
+ * ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
  * ║                                                                  ║
- * ║   discord  ──  https://discord.gg/codexdev                      ║
- * ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
- * ║   github   ──  https://github.com/RayExo                        ║
- * ║                                                                  ║
+    * ║                                                                  ║
  * ╚══════════════════════════════════════════════════════════════════╝
  */
 
@@ -44,14 +41,18 @@ import { TicketConfig, TicketCategory, TicketEmbed } from "@/types/api";
 interface TicketsFormProps {
   initialConfig: TicketConfig;
   guildId: string;
+  channels?: any[];
 }
 
-export function TicketsForm({ initialConfig, guildId }: TicketsFormProps) {
+export function TicketsForm({ initialConfig, guildId, channels = [] }: TicketsFormProps) {
   const [config, setConfig] = useState<TicketConfig>(initialConfig);
   const [saving, setSaving] = useState(false);
   const [editingCategory, setEditingCategory] = useState<{index: number, data: TicketCategory} | null>(null);
   const [editingEmbed, setEditingEmbed] = useState<TicketEmbed | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+
+  const textChannels = channels.filter(c => c.type == 0 || c.type === "0" || c.type === "text" || c.type == 5 || c.type === "5" || c.type === "announcement");
+  const categoryChannels = channels.filter(c => c.type == 4 || c.type === "4" || c.type === "category");
 
   async function fetchUpdatedConfig() {
     try {
@@ -309,27 +310,54 @@ export function TicketsForm({ initialConfig, guildId }: TicketsFormProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase text-slate-500 tracking-widest">Panel Channel ID</label>
-                <Input 
-                  value={config.panel_channel || ""} 
-                  onChange={(e) => setConfig({...config, panel_channel: e.target.value})}
-                  placeholder="Where the ticket panel lives"
-                />
+                <Select 
+                  value={config.panel_channel || "none"}
+                  onValueChange={(val) => setConfig({...config, panel_channel: val === "none" ? null : val})}
+                >
+                  <SelectTrigger className="bg-slate-900/50 border-slate-800">
+                    <SelectValue placeholder="Where the ticket panel lives" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-slate-800">
+                    <SelectItem value="none" className="text-slate-400">Not Set</SelectItem>
+                    {textChannels.map(c => (
+                      <SelectItem key={c.id} value={c.id.toString()}># {c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase text-slate-500 tracking-widest">Logging Channel ID</label>
-                <Input 
-                  value={config.logging_channel || ""} 
-                  onChange={(e) => setConfig({...config, logging_channel: e.target.value})}
-                  placeholder="Where transcripts go"
-                />
+                <Select 
+                  value={config.logging_channel || "none"}
+                  onValueChange={(val) => setConfig({...config, logging_channel: val === "none" ? null : val})}
+                >
+                  <SelectTrigger className="bg-slate-900/50 border-slate-800">
+                    <SelectValue placeholder="Where transcripts go" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-slate-800">
+                    <SelectItem value="none" className="text-slate-400">Not Set</SelectItem>
+                    {textChannels.map(c => (
+                      <SelectItem key={c.id} value={c.id.toString()}># {c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase text-slate-500 tracking-widest">Closed Tickets Category ID</label>
-                <Input 
-                  value={config.closed_category || ""} 
-                  onChange={(e) => setConfig({...config, closed_category: e.target.value})}
-                  placeholder="Archive closed tickets here"
-                />
+                <Select 
+                  value={config.closed_category || "none"}
+                  onValueChange={(val) => setConfig({...config, closed_category: val === "none" ? null : val})}
+                >
+                  <SelectTrigger className="bg-slate-900/50 border-slate-800">
+                    <SelectValue placeholder="Archive closed tickets here" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-slate-800">
+                    <SelectItem value="none" className="text-slate-400">Not Set</SelectItem>
+                    {categoryChannels.map(c => (
+                      <SelectItem key={c.id} value={c.id.toString()}>📁 {c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase text-slate-500 tracking-widest">Panel Interaction Type</label>
@@ -347,14 +375,12 @@ export function TicketsForm({ initialConfig, guildId }: TicketsFormProps) {
                 </Select>
               </div>
               <div className="space-y-2 md:col-span-2">
-                <label className="text-xs font-black uppercase text-slate-500 tracking-widest">Global Staff Role IDs</label>
+                <label className="text-xs font-black uppercase text-slate-500 tracking-widest">Aggregated Staff Role IDs</label>
                 <Input 
                   value={config.staff_roles.join(", ")} 
-                  onChange={(e) => {
-                    const roles = e.target.value.split(",").map(id => id.trim()).filter(id => id && !isNaN(Number(id))).map(Number);
-                    setConfig({...config, staff_roles: roles})
-                  }}
-                  placeholder="ID1, ID2... These roles can see all tickets"
+                  readOnly
+                  className="opacity-60 cursor-not-allowed bg-slate-900/50"
+                  placeholder="These are derived from your Category staff roles below."
                 />
               </div>
             </div>

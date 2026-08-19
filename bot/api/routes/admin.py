@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -17,10 +14,10 @@ from api.dependencies import get_bot
 from api.schemas import AdminStats, AdminNodeStatus, AdminConfig, AdminConfigUpdate
 from typing import TYPE_CHECKING, List
 import os
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 
 if TYPE_CHECKING:
-    from core.zyrox import zyrox
+    from core.shikshabot import shikshabot
 
 router = APIRouter()
 
@@ -38,7 +35,7 @@ import psutil
 import time
 
 @router.get("/stats", response_model=AdminStats)
-async def get_admin_stats(bot: "zyrox" = Depends(get_bot)):
+async def get_admin_stats(bot: "shikshabot" = Depends(get_bot)):
     # Calculate DB size and shard info
     total_size: float = 0.0
     db_count = 0

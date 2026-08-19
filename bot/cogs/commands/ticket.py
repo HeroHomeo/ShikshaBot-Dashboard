@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -18,7 +15,7 @@ import discord
 from utils.emoji import CROSS, DELETE_ALT1, HANDSHAKE, LOCK, TICK, UNLOCK, ZBAN, ZMODULE, ZWRENCH
 from discord import app_commands
 from discord.ext import commands
-import sqlite3
+from db import sqlite3_mock as sqlite3
 from datetime import datetime
 import asyncio
 import io
@@ -35,8 +32,8 @@ SUCCESS_EMOJI = TICK
 ERROR_EMOJI = CROSS
 LOCK_EMOJI = f"{UNLOCK} "
 UNLOCK_EMOJI = LOCK
-CLAIM_EMOJI = HANDSHAKE
-CLOSE_EMOJI = ZBAN
+CLAIM_EMOJI = "🙌"
+CLOSE_EMOJI = "🔒"
 DELETE_EMOJI = DELETE_ALT1
 REOPEN_EMOJI = ZWRENCH
 TRANSCRIPT_EMOJI = ZMODULE
@@ -294,16 +291,27 @@ class TicketCog(commands.Cog, name="Ticket System"):
 
     @commands.Cog.listener()
     async def on_interaction(self, inter):
+        """Executes the on interaction command."""
         if inter.type == discord.InteractionType.component and (cid := inter.data.get("custom_id","")).startswith("create_ticket_"): await self.create_ticket_flow(inter, int(cid.split("_")[-1]))
+
+    @commands.Cog.listener()
+    async def on_guild_channel_delete(self, channel):
+        """Executes the on guild channel delete command."""
+        self.db.execute("DELETE FROM open_tickets WHERE channel_id=?", (channel.id,))
 
     async def create_ticket_flow(self, inter, cat_id):
         await inter.response.defer(ephemeral=True)
         guild, user = inter.guild, inter.user
-        if (count := self.db.fetchone("SELECT ticket_count FROM user_ticket_counts WHERE guild_id=? AND user_id=?",(guild.id,user.id))) and count['ticket_count'] >= TICKET_LIMIT_PER_USER: return await inter.followup.send(f"You have reached the max of {TICKET_LIMIT_PER_USER} open tickets.",ephemeral=True)
+        active_tickets = self.db.fetchone("SELECT COUNT(*) as c FROM open_tickets WHERE guild_id=? AND creator_id=? AND closed_at IS NULL", (guild.id, user.id))
+        if active_tickets and active_tickets['c'] >= TICKET_LIMIT_PER_USER: return await inter.followup.send(f"You have reached the max of {TICKET_LIMIT_PER_USER} open tickets.",ephemeral=True)
         
         cat_info = self.db.fetchone("SELECT * FROM ticket_categories WHERE category_id=?", (cat_id,))
-        disc_cat = guild.get_channel(cat_info['discord_category_id'])
-        if not cat_info or not disc_cat: return await inter.followup.send("This ticket category has been deleted or is misconfigured.", ephemeral=True)
+        if not cat_info:
+            return await inter.followup.send("This ticket button is from an old configuration! Please use the newest ticket panel.", ephemeral=True)
+            
+        disc_cat = guild.get_channel(int(cat_info['discord_category_id'])) if cat_info['discord_category_id'] else None
+        if not disc_cat: 
+            return await inter.followup.send("The Discord Category for this ticket is missing! Please go to the dashboard, edit this Ticket Category, and paste a valid 'Discord Category ID'.", ephemeral=True)
         
         t_num = (self.db.fetchone("SELECT MAX(ticket_number) as n FROM open_tickets WHERE guild_id=?", (guild.id,))['n'] or 0) + 1
         
@@ -323,8 +331,12 @@ class TicketCog(commands.Cog, name="Ticket System"):
         self.db.execute('INSERT INTO user_ticket_counts VALUES (?,?,1) ON CONFLICT(guild_id,user_id) DO UPDATE SET ticket_count=ticket_count+1', (guild.id,user.id))
         await log_ticket_action(self.db, guild, user, "Ticket Created", f"Ticket {ch.mention} by {user.mention} (Category: {cat_info['name']}).")
         
-        ticket_embed = discord.Embed(title=f"Welcome to your Ticket ( #{t_num:04d} )", description="Thank you for reaching out for support. Our staff team has been notified and will be with you as soon as possible.\n\nPlease describe your issue in detail while you wait.", color=EMBED_COLOR)
-        ticket_embed.set_image(url=TICKET_CHANNEL_IMAGE_URL)
+        ticket_embed = discord.Embed(
+            title="Ticket Created", 
+            description=f"Welcome {user.mention}, thank you for reaching out to our support team!\nWe will get back to you as soon as possible.", 
+            color=0xFF0000
+        )
+        ticket_embed.set_footer(text="ShikshaBot | codex.top", icon_url=self.bot.user.display_avatar.url)
         await ch.send(content=" ".join(pings), embed=ticket_embed, view=TicketActionsView(self, ch.id, cat_id))
         await inter.followup.send(f"Your ticket has been successfully created: {ch.mention}", ephemeral=True)
 
@@ -339,6 +351,34 @@ class TicketCog(commands.Cog, name="Ticket System"):
     @app_commands.choices(style=[app_commands.Choice(name="Dropdown Menu", value="dropdown"), app_commands.Choice(name="Buttons", value="button")])
     async def setup(self, ctx, style: app_commands.Choice[str], channel: discord.TextChannel):
         await EmbedEditorView(self, ctx, channel, style.value).start(ctx.interaction)
+
+    @ticket.command(name="send", description="Send the pre-configured ticket panel (from the dashboard) to the channel.")
+    @commands.has_permissions(manage_guild=True)
+    async def send_panel(self, ctx):
+        guild_id = ctx.guild.id
+        config = self.db.fetchone("SELECT * FROM guild_configs WHERE guild_id=?", (guild_id,))
+        if not config or not config['panel_channel_id']:
+            return await ctx.send(f"{ERROR_EMOJI} Ticket panel channel is not configured. Please set it in the dashboard.")
+        
+        panel_ch = ctx.guild.get_channel(config['panel_channel_id'])
+        if not panel_ch:
+            return await ctx.send(f"{ERROR_EMOJI} Configured panel channel not found. Ensure the channel exists.")
+            
+        panel_embed = discord.Embed(
+            title=config['embed_title'] or "Support Tickets", 
+            description=config['embed_description'] or "Click below to open a ticket.", 
+            color=config['embed_color'] or EMBED_COLOR
+        )
+        if img_url := config['embed_image_url']: panel_embed.set_image(url=img_url)
+        if thumb_url := config['embed_thumbnail_url']: panel_embed.set_thumbnail(url=thumb_url)
+        
+        final_view = self.create_panel_view(guild_id)
+        if not final_view:
+            return await ctx.send(f"{ERROR_EMOJI} No ticket categories found! Please configure them in the dashboard.")
+            
+        msg = await panel_ch.send(embed=panel_embed, view=final_view)
+        self.db.execute("UPDATE guild_configs SET panel_message_id = ? WHERE guild_id = ?", (msg.id, guild_id))
+        await ctx.send(f"{SUCCESS_EMOJI} Ticket panel successfully sent to {panel_ch.mention}!")
 
     @ticket.command(name="close", description="Close the current ticket channel.")
     @commands.has_permissions(manage_channels=True)
@@ -376,18 +416,27 @@ class TicketActionsView(discord.ui.View):
         self.cog, self.ch_id, self.cat_id = cog, ch_id, cat_id
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if interaction.user.guild_permissions.manage_channels or interaction.user.guild_permissions.administrator:
+            return True
+            
+        t = self.cog.db.fetchone("SELECT creator_id FROM open_tickets WHERE channel_id=?", (self.ch_id,))
+        is_creator = (t and t['creator_id'] == interaction.user.id)
+        
+        custom_id = interaction.data.get("custom_id", "")
+        
         cat_info = self.cog.db.fetchone("SELECT notified_roles FROM ticket_categories WHERE category_id=?", (self.cat_id,))
-        if not cat_info or not cat_info['notified_roles']:
-            await interaction.response.send_message("This ticket is misconfigured; no staff roles are assigned.", ephemeral=True)
-            return False
+        is_staff = False
+        if cat_info and cat_info['notified_roles']:
+            allowed_role_ids = {int(r_id) for r_id in cat_info['notified_roles'].split(',')}
+            user_role_ids = {role.id for role in interaction.user.roles}
+            if user_role_ids.intersection(allowed_role_ids):
+                is_staff = True
+                
+        if is_staff: return True
+        if is_creator and custom_id == "t_close": return True
         
-        allowed_role_ids = {int(r_id) for r_id in cat_info['notified_roles'].split(',')}
-        user_role_ids = {role.id for role in interaction.user.roles}
-        
-        if not user_role_ids.intersection(allowed_role_ids):
-            await interaction.response.send_message("You do not have the required role to perform this action.", ephemeral=True)
-            return False
-        return True
+        await interaction.response.send_message("You do not have the required role to perform this action.", ephemeral=True)
+        return False
 
     @discord.ui.button(label="Lock", emoji=LOCK_EMOJI, custom_id="t_lock", style=discord.ButtonStyle.secondary)
     async def b_lock(self, i, b):
@@ -432,18 +481,38 @@ class TicketActionsView(discord.ui.View):
         closed_category = await get_or_create_closed_category(self.cog.db, i.guild)
         if closed_category: await i.channel.edit(category=closed_category)
         
-        self.cog.db.execute("UPDATE open_tickets SET closed_by_id=?, closed_at=? WHERE channel_id=?", (i.user.id, datetime.now().isoformat(), self.ch_id))
+        close_time = datetime.now()
+        self.cog.db.execute("UPDATE open_tickets SET closed_by_id=?, closed_at=? WHERE channel_id=?", (i.user.id, close_time.isoformat(), self.ch_id))
         await log_ticket_action(self.cog.db, i.guild, i.user, "Closed", f"Ticket {i.channel.mention} (Category: {category_name})")
+        
+        if creator:
+            try:
+                open_date = datetime.fromisoformat(t['created_at']) if t['created_at'] else close_time
+                open_date_str = f"<t:{int(open_date.timestamp())}:f>"
+                close_date_str = f"<t:{int(close_time.timestamp())}:f>"
+                
+                dm_embed = discord.Embed(title="Ticket Closed", description=f"Your ticket has been closed in **{i.guild.name}**!", color=0x5865F2)
+                dm_embed.add_field(name="Ticket Information", value=f"• **Open Date:** {open_date_str}\n• **Panel Name:** {category_name}\n• **Ticket Name:** {i.channel.name}", inline=False)
+                dm_embed.add_field(name="Close Information", value=f"• **Closed By:** {i.user.mention}\n• **Close Date:** {close_date_str}\n• **Close Reason:** No reason provided", inline=False)
+                dm_embed.add_field(name="\u200b", value="*If you have any further questions or concerns, feel free to open a new ticket.*", inline=False)
+                dm_embed.set_footer(text="ShikshaBot | codex.top", icon_url=self.cog.bot.user.display_avatar.url)
+                await creator.send(embed=dm_embed)
+            except Exception:
+                pass
+        
+        open_date = datetime.fromisoformat(t['created_at']) if t['created_at'] else close_time
+        open_date_str = f"<t:{int(open_date.timestamp())}:f>"
+        close_date_str = f"<t:{int(close_time.timestamp())}:f>"
         
         closed_embed = discord.Embed(
             title="Ticket Closed",
-            description=f"This ticket has been officially closed and archived by {i.user.mention}.\nThe user has been removed from the channel.\n\nStaff can use the buttons below to reopen, create a transcript, or permanently delete the channel.",
-            color=EMBED_COLOR,
-            timestamp=datetime.now()
+            description=f"Your ticket has been closed in **{i.guild.name}**!",
+            color=0x5865F2
         )
-        closed_embed.add_field(name="Ticket Creator", value=f"<@{t['creator_id']}>", inline=True)
-        closed_embed.add_field(name="Closed By", value=i.user.mention, inline=True)
-        closed_embed.add_field(name="Original Category", value=category_name, inline=True)
+        closed_embed.add_field(name="Ticket Information", value=f"• **Open Date:** {open_date_str}\n• **Panel Name:** {category_name}\n• **Ticket Name:** {i.channel.name}", inline=False)
+        closed_embed.add_field(name="Close Information", value=f"• **Closed By:** {i.user.mention}\n• **Close Date:** {close_date_str}\n• **Close Reason:** No reason provided", inline=False)
+        closed_embed.add_field(name="\u200b", value="*Staff can use the buttons below to reopen, create a transcript, or permanently delete the channel.*", inline=False)
+        closed_embed.set_footer(text="ShikshaBot | codex.top", icon_url=self.cog.bot.user.display_avatar.url)
         
         await i.channel.send(embed=closed_embed, view=ClosedTicketActionsView(self.cog, self.ch_id, self.cat_id))
         await i.message.edit(view=None)
@@ -456,6 +525,9 @@ class ClosedTicketActionsView(discord.ui.View):
         self.cog, self.ch_id, self.cat_id = cog, ch_id, cat_id
     
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if interaction.user.guild_permissions.manage_channels or interaction.user.guild_permissions.administrator:
+            return True
+            
         cat_info = self.cog.db.fetchone("SELECT notified_roles FROM ticket_categories WHERE category_id=?", (self.cat_id,))
         if not cat_info or not cat_info['notified_roles']: return False
         allowed_role_ids = {int(r_id) for r_id in cat_info['notified_roles'].split(',')}

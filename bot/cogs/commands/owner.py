@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -20,14 +17,14 @@ import discord
 import json
 import datetime
 import asyncio
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 from typing import Optional
 from utils import Paginator, DescriptionEmbedPaginator, FieldPagePaginator, TextPaginator
 from utils.Tools import *
 from utils.config import OWNER_IDS, BOT_OWNER_IDS
 from utils.emoji import BOOSTS, DISCORD_BADGE_EMOJIS, LOADINGRED, NITRO_BOOST, TICK, ZWARNING
-from core import Cog, zyrox, Context
-import sqlite3
+from core import Cog, shikshabot, Context
+from db import sqlite3_mock as sqlite3
 import os
 import requests
 import numpy as np
@@ -205,6 +202,8 @@ class Owner(commands.Cog):
     @commands.command(name="slist")
     @commands.check(is_owner_or_staff)
     async def _slist(self, ctx):
+        """
+Executes the  slist command."""
         servers = sorted(self.client.guilds, key=lambda g: g.member_count, reverse=True)
         entries = [
             f"`#{i}` | [{g.name}](https://discord.com/guilds/{g.id}) - {g.member_count}"
@@ -223,6 +222,8 @@ class Owner(commands.Cog):
     @commands.command(name="mutuals", aliases=["mutual"])
     @commands.is_owner()
     async def mutuals(self, ctx, user: discord.User):
+        """
+Executes the mutuals command."""
         guilds = [guild for guild in self.client.guilds if user in guild.members]
         entries = [
             f"`#{no}` | [{guild.name}](https://discord.com/channels/{guild.id}) - {guild.member_count}"
@@ -240,6 +241,8 @@ class Owner(commands.Cog):
     @commands.command(name="getinvite", aliases=["gi", "guildinvite"])
     @commands.is_owner()
     async def getinvite(self, ctx: Context, guild= discord.Guild):   
+        """
+Executes the getinvite command."""
         if not guild:
             await ctx.send("Invalid server.")
             return
@@ -304,6 +307,8 @@ class Owner(commands.Cog):
     @commands.command(name="owners")
     @commands.is_owner()
     async def own_list(self, ctx):
+        """
+Executes the own list command."""
         nplist = OWNER_IDS
         npl = ([await self.client.fetch_user(nplu) for nplu in nplist])
         npl = sorted(npl, key=lambda nop: nop.created_at)
@@ -327,7 +332,8 @@ class Owner(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def dm(self, ctx, user: discord.User, *, message: str):
-        """ DM the user of your choice """
+        """
+ DM the user of your choice """
         try:
             await user.send(message)
             await ctx.send(f"{TICK} | Successfully Sent a DM to **{user}**")
@@ -339,6 +345,8 @@ class Owner(commands.Cog):
     @commands.group()
     @commands.is_owner()
     async def change(self, ctx):
+        """
+Executes the change command."""
         if ctx.invoked_subcommand is None:
             await ctx.send_help(str(ctx.command))
 
@@ -346,7 +354,8 @@ class Owner(commands.Cog):
     @change.command(name="nickname")
     @commands.is_owner()
     async def change_nickname(self, ctx, *, name: str = None):
-        """ Change nickname. """
+        """
+ Change nickname. """
         try:
             await ctx.guild.me.edit(nick=name)
             if name:
@@ -360,6 +369,8 @@ class Owner(commands.Cog):
     @commands.command(name="ownerban", aliases=["forceban", "dna"])
     @commands.is_owner()
     async def _ownerban(self, ctx: Context, user_id: int, *, reason: str = "No reason provided"):
+        """
+Executes the  ownerban command."""
         
         member = ctx.guild.get_member(user_id)
         if member:
@@ -394,6 +405,8 @@ class Owner(commands.Cog):
     @commands.command(name="ownerunban", aliases=["forceunban"])
     @commands.is_owner()
     async def _ownerunban(self, ctx: Context, user_id: int, *, reason: str = "No reason provided"):
+        """
+Executes the  ownerunban command."""
         user = self.client.get_user(user_id)
         if user:
             try:
@@ -426,6 +439,8 @@ class Owner(commands.Cog):
     @commands.command(name="globalunban")
     @commands.is_owner()
     async def globalunban(self, ctx: Context, user: discord.User):
+        """
+Executes the globalunban command."""
         success_guilds = []
         error_guilds = []
 
@@ -450,6 +465,8 @@ class Owner(commands.Cog):
     @commands.command(name="guildban")
     @commands.is_owner()
     async def guildban(self, ctx: Context, guild_id: int, user_id: int, *, reason: str = "No reason provided"):
+        """
+Executes the guildban command."""
         guild = self.client.get_guild(guild_id)
         if not guild:
             await ctx.reply("Bot is not present in the specified guild.", mention_author=False)
@@ -470,6 +487,8 @@ class Owner(commands.Cog):
     @commands.command(name="guildunban")
     @commands.is_owner()
     async def guildunban(self, ctx: Context, guild_id: int, user_id: int, *, reason: str = "No reason provided"):
+        """
+Executes the guildunban command."""
         guild = self.client.get_guild(guild_id)
         if not guild:
             await ctx.reply("Bot is not present in the specified guild.", mention_author=False)
@@ -495,6 +514,8 @@ class Owner(commands.Cog):
     @commands.command(name="leaveguild", aliases=["leavesv"])
     @commands.is_owner()
     async def leave_guild(self, ctx, guild_id: int):
+        """
+Executes the leave guild command."""
         guild = self.client.get_guild(guild_id)
         if guild is None:
             await ctx.send(f"Guild with ID {guild_id} not found.")
@@ -506,6 +527,8 @@ class Owner(commands.Cog):
     @commands.command(name="guildinfo")
     @commands.check(is_owner_or_staff)
     async def guild_info(self, ctx, guild_id: int):
+        """
+Executes the guild info command."""
         guild = self.client.get_guild(guild_id)
         if guild is None:
             await ctx.send(f"Guild with ID {guild_id} not found.")
@@ -530,6 +553,8 @@ class Owner(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def servertour(self, ctx, time_in_seconds: int, member: discord.Member):
+        """
+Executes the servertour command."""
         guild = ctx.guild
 
         if time_in_seconds > 3600:
@@ -600,6 +625,8 @@ class Owner(commands.Cog):
     @ignore_check()
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def bdg(self, ctx):
+        """
+Executes the bdg command."""
         if ctx.invoked_subcommand is None:
             embed = discord.Embed(description='Invalid `bdg` command passed. Use `add` or `remove`.', color=0xFF0000)
             await ctx.send(embed=embed)
@@ -610,6 +637,7 @@ class Owner(commands.Cog):
     @ignore_check()
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def add(self, ctx, member: discord.Member, badge: str):
+        """Executes the add command."""
         badge = badge.lower()
         user_id = member.id
         if badge in BADGE_URLS or badge == 'bug' or badge == 'all':
@@ -636,6 +664,7 @@ class Owner(commands.Cog):
     @ignore_check()
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def remove(self, ctx, member: discord.Member, badge: str):
+        """Executes the remove command."""
         badge = badge.lower()
         user_id = member.id
         if badge in BADGE_URLS or badge == 'bug' or badge == 'all':
@@ -664,6 +693,7 @@ class Owner(commands.Cog):
     @commands.is_owner()
     @commands.bot_has_permissions(manage_messages=True)
     async def _purgebot(self, ctx, prefix=None, search=100):
+        """Executes the  purgebot command."""
         
         await ctx.message.delete()
         
@@ -680,6 +710,7 @@ class Owner(commands.Cog):
     @commands.is_owner()
     @commands.bot_has_permissions(manage_messages=True)
     async def purguser(self, ctx, member: discord.Member, search=100):
+        """Executes the purguser command."""
         
         await ctx.message.delete()
         
@@ -688,7 +719,8 @@ class Owner(commands.Cog):
         
 # p2
 class Badges(commands.Cog):
-    """Handles the profile and badge display system."""
+    """
+Handles the profile and badge display system."""
     def __init__(self, bot):
         self.bot = bot
 
@@ -764,8 +796,11 @@ class Badges(commands.Cog):
             return discord.File(fp=image_binary, filename='profile.png')
 
     @commands.hybrid_command(name='profile', aliases=['pr', 'badgesf'])
-    @commands.cooldown(1, 8, commands.BucketType.user)
-    async def profile(self, ctx: commands.Context, member: discord.Member = None):
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
+    async def profile(self, ctx, member: discord.Member = None):
+        """
+Executes the badges command."""
         member = member or ctx.author
         
         loading_embed = discord.Embed(

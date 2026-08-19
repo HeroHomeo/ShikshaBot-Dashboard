@@ -5,12 +5,9 @@
  * ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
  * ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
  * ║                                                                  ║
- * ║           © 2026 CodeX Devs — All Rights Reserved               ║
+ * ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
  * ║                                                                  ║
- * ║   discord  ──  https://discord.gg/codexdev                      ║
- * ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
- * ║   github   ──  https://github.com/RayExo                        ║
- * ║                                                                  ║
+    * ║                                                                  ║
  * ╚══════════════════════════════════════════════════════════════════╝
  */
 
@@ -25,7 +22,10 @@ const TicketsForm = dynamic(() => import("@/components/dashboard/tickets-form").
 });
 
 export default async function TicketsPage({ params }: { params: { guildId: string } }) {
-  const config = await api.getTickets(params.guildId);
+  const [config, channels] = await Promise.all([
+    api.getTickets(params.guildId),
+    api.getChannels(params.guildId)
+  ]);
 
   if (!config) return null;
 
@@ -51,7 +51,7 @@ export default async function TicketsPage({ params }: { params: { guildId: strin
         </div>
       </div>
 
-      <TicketsForm initialConfig={config} guildId={params.guildId} />
+      <TicketsForm initialConfig={config} guildId={params.guildId} channels={channels || []} />
     </div>
   );
 }

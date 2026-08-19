@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -75,13 +72,14 @@ class AutomodConfig(BaseModel):
     ignored_roles: List[int]
     ignored_channels: List[int]
     logging_channel: Optional[int]
+    blacklist_words: List[str] = []
 
 class TicketCategory(BaseModel):
     name: str
     emoji: Optional[str]
     staff_roles: List[int] = []
     button_style: Optional[int] = 2 # Blurple
-    discord_category_id: Optional[int] = None
+    discord_category_id: Optional[str] = None
 
 class TicketEmbed(BaseModel):
     title: Optional[str]
@@ -92,10 +90,10 @@ class TicketEmbed(BaseModel):
 
 class TicketConfig(BaseModel):
     guild_id: int
-    panel_channel: Optional[int]
-    panel_message: Optional[int]
-    logging_channel: Optional[int] = None
-    closed_category: Optional[int] = None
+    panel_channel: Optional[str]
+    panel_message: Optional[str]
+    logging_channel: Optional[str] = None
+    closed_category: Optional[str] = None
     panel_type: Optional[str] = "button"
     embed: TicketEmbed
     categories: List[TicketCategory]
@@ -151,9 +149,9 @@ class AntiNukeConfig(BaseModel):
 
 class VerificationConfig(BaseModel):
     guild_id: int
-    verification_channel_id: Optional[str] = None
-    verified_role_id: Optional[str] = None
-    log_channel_id: Optional[str] = None
+    verification_channel_id: str | int | None = None
+    verified_role_id: str | int | None = None
+    log_channel_id: str | int | None = None
     verification_method: Optional[str] = "both"
     enabled: Optional[bool] = True
 
@@ -286,9 +284,9 @@ class PrefixUpdate(BaseModel):
     prefix: str
 
 class TicketUpdate(BaseModel):
-    panel_channel: Optional[int] = None
-    logging_channel: Optional[int] = None
-    closed_category: Optional[int] = None
+    panel_channel: Optional[str] = None
+    logging_channel: Optional[str] = None
+    closed_category: Optional[str] = None
     panel_type: Optional[str] = None
     embed_title: Optional[str] = None
     embed_description: Optional[str] = None
@@ -304,6 +302,7 @@ class AutomodUpdate(BaseModel):
     ignored_roles: Optional[List[int]] = None
     ignored_channels: Optional[List[int]] = None
     logging_channel: Optional[int] = None
+    blacklist_words: Optional[List[str]] = None
 
 class LevelingUpdate(BaseModel):
     enabled: Optional[bool] = None

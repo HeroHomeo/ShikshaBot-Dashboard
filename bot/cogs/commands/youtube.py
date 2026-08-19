@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -25,6 +22,8 @@ class Youtube(commands.Cog):
 
     @commands.command(name='yt', aliases=['youtube'])
     async def search_youtube(self, ctx, *, search_query):
+        """
+Executes the search youtube command."""
         query_string = urllib.parse.urlencode({'search_query': search_query})
         html_content = urllib.request.urlopen('http://www.youtube.com/results?' + query_string)
         search_results = re.findall(r"watch\?v=(\S{11})", html_content.read().decode())

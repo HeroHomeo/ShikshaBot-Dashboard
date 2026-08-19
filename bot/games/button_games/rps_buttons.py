@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -131,7 +128,6 @@ class BetaRockPaperScissors(RockPaperScissors):
     """
     RockPaperScissors(buttons) game
     """
-
     player1: discord.User
     embed: discord.Embed
 
@@ -151,7 +147,7 @@ class BetaRockPaperScissors(RockPaperScissors):
         timeout: Optional[float] = None,
     ) -> discord.Message:
         if ctx.author == self.player2:
-            embed = discord.Embed(title=f"{WARNING_ALT}   Access Denied", description="You cannot play against yourself!", color=0x000000)
+            embed = discord.Embed(title=f"{WARNING_ALT}   Access Denied", description="You cannot play against yourself!", color=0xFF0000)
             return await ctx.reply(embed=embed)
             
         """

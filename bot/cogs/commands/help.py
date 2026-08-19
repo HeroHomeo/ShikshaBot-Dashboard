@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -19,7 +16,7 @@ from discord import app_commands, Interaction
 from difflib import get_close_matches
 from contextlib import suppress
 from core import Context
-from core.zyrox import zyrox
+from core.shikshabot import shikshabot
 from core.Cog import Cog
 from utils.Tools import getConfig
 from itertools import chain
@@ -33,7 +30,7 @@ from utils.cv2 import CV2, CV2Embed
 from utils.config import *
 
 color = 0xFF0000
-client = zyrox()
+client = shikshabot()
 
 from utils.config import BotName
 
@@ -99,69 +96,100 @@ class HelpCommand(commands.HelpCommand):
     loading_embed = CV2(f"{LOADINGRED} Loading help Menu...")
     loading_msg = await ctx.reply(view=loading_embed)
 
-    # Wait 2 seconds
-    await asyncio.sleep(2)
+    # Wait 1 second (faster loading)
+    await asyncio.sleep(1)
 
-    # Delete loading message
     with suppress(discord.NotFound):
       await loading_msg.delete()
 
     data = await getConfig(self.context.guild.id)
     prefix = data["prefix"]
-    filtered = await self.filter_commands(self.context.bot.walk_commands(), sort=True)
 
-    embed = CV2Embed(
+    embed = discord.Embed(
+        title=f"{self.context.bot.user.name} Help Directory",
         description=(
-         f"**{ARROWRED} __Start {BotName} Today__**\n"        
-         f"**{ZARROW} Type {prefix}antinuke enable**\n"
-         f"**{ZARROW} Server Prefix:** `{prefix}`\n"
-         f"**{ZARROW} Total Commands:** `{len(set(self.context.bot.walk_commands()))}`\n"),         
-        color=0xFF0000)
-    
-    embed.add_field(
-        name=f"{ZCLOUD} Main Features",
-        value=f">>> \n {ZSAFE} `»` Security\n" 
-              f" {ZBOT} `»` Automoderation\n"
-              f" {ZWRENCH} `»` Utility\n" 
-              f" {MUSIC} `»` Music\n"
-              f" {WIFI} `»` Autoreact & responder\n"
-              f" {SWORD} `»` Moderation\n"
-              f" {ZPEOPLE} `»` Autorole & Invc\n"
-              f" {ZROCKET} `»` Fun\n"
-              f" {GAMES} `»` Games\n" 
-              f" {ZBAN} `»` Ignore Channels\n"
-              f" {WIFI} `»` Server\n"
-              f" {ZUNMUTE} `»` Voice\n"
-              f" {SEED} `»` Welcomer\n"  
-              f" {ZTADA} `»` Giveaway\n"
-              f" {TICKET} `»` Ticket {NEW}\n"
-              f" {ZPEOPLE} `»` Invite Tracker {NEW}\n"
+            f"Browse through the categories below using the dropdown menu.\n"
+            f"Need details on a specific command? Run `{prefix}help <command>`!"
+        ),
+        color=0xFF0000
     )
-    
-    embed.add_field(
-        name=f" {ZMODULE} Extra Features",
-        value=f">>> \n {CAST} `»` Advance Logging\n"
-              f" {STAR} `»` Vanityroles\n"
-              f" {ZCOUNTING} `»` Counting {NEW}\n"
-              f" {SYSTEM} `»` J2C {NEW}\n"
-              f" {ZAI} `»` AI {NEW}\n"
-              f" {BOOST} `»` Boost {NEW}\n"
-              f" {LEVEL_UP} `»` Leveling {NEW}\n"
-              f" {PIN} `»` Sticky {NEW}\n"
-              f" {THUNDER} `»` Verification {NEW}\n"
-              f" {LOCK} `»` Encryption {NEW}\n" 
-              f" {MINECRAFT} `»` Minecraft {NEW}\n"
-              f" {MESSAGE} `»` Joindm {NEW}\n"
-              f" {ZCIRCLE} `»` Birthday {NEW}\n"
-              f" {ZCIRCLE_ALT1} `»` Customrole\n"           
-    )
+    if self.context.bot.user.display_avatar:
+        embed.set_thumbnail(url=self.context.bot.user.display_avatar.url)
+        embed.set_author(name=f"Command Categories", icon_url=self.context.bot.user.display_avatar.url)
 
-    embed.set_footer(
-      text=f"Requested By {self.context.author} | [Support](https://discord.gg/codexdev)",
-    )
+    current_field_value = ""
+    used_labels = set()
+
+    # Use the curated dummy cogs for home page grouping instead of raw mapping
+    for cog in self.context.bot.cogs.values():
+        if hasattr(cog, "help_custom"):
+            try:
+                emoji, label, _ = cog.help_custom()
+            except Exception:
+                continue
+            
+            # Find the dummy command to get the string
+            cmds = cog.get_commands()
+            if not cmds or not cmds[0].short_doc:
+                continue
+                
+            subcmds = [s.strip().replace("`", "") for s in cmds[0].short_doc.split(",")]
+            # remove any newlines from the string and clean it up
+            cleaned = []
+            for s in subcmds:
+                if '\n' in s:
+                    cleaned.extend([x.strip() for x in s.split('\n') if x.strip()])
+                elif s:
+                    cleaned.append(s)
+            
+            if not cleaned:
+                continue
+
+            # Prevent duplicate labels
+            original_label = label
+            counter = 1
+            while label in used_labels:
+                label = f"{original_label} {counter}"
+                counter += 1
+            used_labels.add(label)
+
+            command_strings = []
+            for c in cleaned:
+                if c.startswith(">"):
+                    command_strings.append(f"`{prefix}{c[1:]}`")
+                elif c.startswith("/"):
+                    command_strings.append(f"`{c}`")
+                else:
+                    command_strings.append(f"`{prefix}{c}`")
+            
+            if command_strings:
+                category_text = f"{emoji} **{label}**\n" + ", ".join(command_strings) + "\n\n"
+                
+                # Check if adding this would exceed the safe 5000 char limit (to leave room for footers, etc)
+                if len(embed) + len(current_field_value) + len(category_text) > 5000:
+                    break
+                    
+                # If adding this category exceeds field limit, start a new field
+                if len(current_field_value) + len(category_text) > 1024:
+                    if not current_field_value:
+                        # Should never happen if categories are reasonably sized
+                        current_field_value = category_text[:1021] + "..."
+                        
+                    embed.add_field(name="\u200b", value=current_field_value, inline=False)
+                    current_field_value = category_text
+                else:
+                    current_field_value += category_text
+
+    # Add the final field if there's leftover text
+    if current_field_value:
+        embed.add_field(name="\u200b", value=current_field_value, inline=False)
     
+    embed.set_thumbnail(url=self.context.bot.user.display_avatar.url if self.context.bot.user.display_avatar else None)
+    
+    # We pass the embed as homeembed to the dropdown UI
     view = vhelp.View(mapping=mapping, ctx=self.context, homeembed=embed, ui=2)
-    await ctx.reply(view=view)
+    current_embed = view.current_embed
+    await ctx.reply(embed=current_embed, view=view)
 
   async def send_command_help(self, command):
     ctx = self.context
@@ -175,20 +203,32 @@ class HelpCommand(commands.HelpCommand):
       await self.send_ignore_message(ctx, "command")
       return
 
-    zyrox = f">>> {command.help}" if command.help else '>>> No Help Provided...'
-    embed = CV2Embed(
-        description=f"""{zyrox}""",
-        color=color)
-    alias = ' & '.join(command.aliases)
+    description = command.help or 'No Information Provided...'
+    
+    embed = discord.Embed(
+        title=f"Command: {command.name}",
+        description=f"```yaml\n{description}\n```",
+        color=0xFF0000
+    )
 
-    embed.add_field(name="**Alt cmd**",
-                      value=f"```{alias}```" if command.aliases else "No Alt cmd",
-                      inline=False)
-    embed.add_field(name="**Usage**",
-                      value=f"```{self.context.prefix}{command.signature}```\n")
-    embed.set_author(name=f"{command.qualified_name.title()} Command")
-    embed.set_footer(text="<[] = optional | < > = required • Use Prefix Before Commands.")
-    await self.context.reply(view=embed, mention_author=False)
+    if command.aliases:
+        alias_str = ", ".join(command.aliases)
+        embed.add_field(name="🔗 Aliases", value=f"`{alias_str}`", inline=True)
+    else:
+        embed.add_field(name="🔗 Aliases", value="`None`", inline=True)
+
+    usage_str = f"{self.context.prefix}{command.qualified_name} {command.signature}".strip()
+    embed.add_field(name="🛠️ Usage", value=f"`{usage_str}`", inline=False)
+    
+    if self.context.bot.user.display_avatar:
+        embed.set_thumbnail(url=self.context.bot.user.display_avatar.url)
+        embed.set_author(name=f"{self.context.bot.user.name} Command Help", icon_url=self.context.bot.user.display_avatar.url)
+    else:
+        embed.set_author(name=f"Command Help")
+        
+    embed.set_footer(text="< > = required | [ ] = optional")
+
+    await self.context.reply(embed=embed, mention_author=False)
 
   def get_command_signature(self, command: commands.Command) -> str:
     parent = command.full_parent_name
@@ -223,8 +263,8 @@ class HelpCommand(commands.HelpCommand):
 
     entries = [
         (
-            f"`{self.context.prefix}{cmd.qualified_name}`\n",
-            f"{cmd.short_doc if cmd.short_doc else ''}\n\u200b"
+            f"🛠️ `{self.context.prefix}{cmd.qualified_name}`",
+            f"```yaml\n{cmd.short_doc if cmd.short_doc else 'No details provided.'}\n```"
         )
         for cmd in group.commands
       ]
@@ -233,8 +273,8 @@ class HelpCommand(commands.HelpCommand):
 
     embeds = FieldPagePaginator(
       entries=entries,
-      title=f"{group.qualified_name.title()} [{count}]",
-      description="< > Duty | [ ] Optional\n",
+      title=f"Group Command: {group.qualified_name.title()} [{count} Subcommands]",
+      description=f"Type `{self.context.prefix}help <subcommand>` for more details.",
       per_page=4
     ).get_pages()   
     
@@ -254,14 +294,14 @@ class HelpCommand(commands.HelpCommand):
       return
 
     entries = [(
-      f"> `{self.context.prefix}{cmd.qualified_name}`",
-      f"-# Description : {cmd.short_doc if cmd.short_doc else ''}"
-      f"\n\u200b",
+      f"🛠️ `{self.context.prefix}{cmd.qualified_name}`",
+      f"```yaml\n{cmd.short_doc if cmd.short_doc else 'No details provided.'}\n```",
     ) for cmd in cog.get_commands()]
+    
     paginator = Paginator(source=FieldPagePaginator(
       entries=entries,
-      title=f"{BRAND_NAME}'s {cog.qualified_name.title()} ({len(cog.get_commands())})",
-      description="`<..> Required | [..] Optional`\n\n",
+      title=f"Category: {cog.qualified_name.title()} ({len(cog.get_commands())} Commands)",
+      description=f"Type `{self.context.prefix}help <command>` for detailed usage.\n",
       color=0xFF0000,
       per_page=4),
                           ctx=self.context)
@@ -270,7 +310,7 @@ class HelpCommand(commands.HelpCommand):
 
 class Help(Cog, name="help"):
 
-  def __init__(self, client: zyrox):
+  def __init__(self, client: shikshabot):
     self._original_help_command = client.help_command
     attributes = {
       'name': "help",

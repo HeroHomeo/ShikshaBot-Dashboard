@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -16,7 +13,7 @@ from discord.ext import commands, tasks
 from discord import *
 import discord
 from utils.emoji import BOOST, ICONS_WARNING, INFO, MENTION, PREMIUM, TICK, TIME, TIMER_ALT1, U_ADMIN, ZDIL, ZHUMAN, ZYROXHAMMER, ZYROXSYS
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 from typing import Optional
 from datetime import datetime, timedelta
 from discord.ui import View, Button, Select
@@ -275,13 +272,20 @@ class NoPrefix(commands.Cog):
                         )
 
                         embed.set_footer(
-                            text=f"{BRAND_NAME}  - No Prefix, Join support to regain access."
+                            text=f"{BRAND_NAME}  - No Prefix, Contact developers to regain access."
                         )
+                        async def support_callback(interaction: discord.Interaction):
+                            await interaction.response.send_message(
+                                "If you really want to support me, then send some real dough! 💸",
+                                file=discord.File('assets/qr_code.png'),
+                                ephemeral=True
+                            )
+
                         support = Button(
                             label="Support",
-                            style=discord.ButtonStyle.link,
-                            url=f"https://discord.gg/codexdev",
+                            style=discord.ButtonStyle.success,
                         )
+                        support.callback = support_callback
                         view = View()
                         view.add_item(support)
 
@@ -303,6 +307,7 @@ class NoPrefix(commands.Cog):
     )
     @commands.check(is_owner_or_staff)
     async def _np(self, ctx):
+        """Executes the  np command."""
         if ctx.invoked_subcommand is None:
             await ctx.send_help(ctx.command)
 
@@ -425,6 +430,7 @@ class NoPrefix(commands.Cog):
     )
     @commands.check(is_owner_or_staff)
     async def np_status(self, ctx, user: discord.User):
+        """Executes the np status command."""
         async with aiosqlite.connect("db/np.db") as db:
             async with db.execute(
                 "SELECT id, expiry_time FROM np WHERE id = ?", (user.id,)
@@ -529,6 +535,7 @@ class NoPrefix(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
+        """Executes the on member update command."""
         if before.premium_since is None and after.premium_since is not None:
             async with aiosqlite.connect(self.db_path) as db:
                 async with db.execute(
@@ -583,7 +590,7 @@ class NoPrefix(commands.Cog):
 
         embed = CV2Embed(
             title="Congratulations you got 2 months No Prefix!",
-            description=f"You've been credited 2 months of global No Prefix for boosting our Partnered Servers. You can now use my commands without prefix. If you wish to remove it, please reach out [Support Server](https://discord.gg/codexdev).",
+            description=f"You've been credited 2 months of global No Prefix for boosting our Partnered Servers. You can now use my commands without prefix. If you wish to remove it, please reach out to our developers.",
             color=0xFF0000,
         )
         try:
@@ -615,7 +622,7 @@ class NoPrefix(commands.Cog):
 
         embed = CV2Embed(
             title=f"{ICONS_WARNING} Global No Prefix Expired",
-            description=f"Hey {user.mention}, your global no prefix has expired!\n\n__**Reason:**__ Unboosting our partnered Server.\nIf you think this is a mistake then please reach out [Support Server](https://discord.gg/codexdev).",
+            description=f"Hey {user.mention}, your global no prefix has expired!\n\n__**Reason:**__ Unboosting our partnered Server.\nIf you think this is a mistake then please reach out to our developers.",
             color=0xFF0000,
         )
 

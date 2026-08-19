@@ -4,16 +4,13 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import json
 import re
 import asyncio
@@ -34,6 +31,7 @@ class greet(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
+        """Executes the on member join command."""
         if member.guild.id not in self.join_queue:
             self.join_queue[member.guild.id] = []
         self.join_queue[member.guild.id].append(member)
@@ -50,7 +48,12 @@ class greet(commands.Cog):
             if row is None:
                 continue
             welcome_type, welcome_message, channel_id, embed_data, auto_delete_duration = row
-            welcome_channel = self.bot.get_channel(channel_id)
+            if not channel_id:
+                continue
+            try:
+                welcome_channel = self.bot.get_channel(int(channel_id))
+            except (ValueError, TypeError):
+                continue
             if not welcome_channel:
                 continue
             placeholders = {

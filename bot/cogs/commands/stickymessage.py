@@ -4,16 +4,13 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import json
 import asyncio
 import os
@@ -55,6 +52,7 @@ class StickyMessage(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
+        """Executes the on message command."""
         if not message.guild or (message.author.bot and message.author.id != self.bot.user.id):
             return
 
@@ -133,12 +131,15 @@ class StickyMessage(commands.Cog):
     @commands.group(aliases=['sticky', 'sm'], invoke_without_command=True)
     @commands.has_permissions(manage_messages=True)
     async def stickymessage(self, ctx: commands.Context):
+        """
+Executes the stickymessage command."""
         if ctx.invoked_subcommand is None:
             await ctx.send_help(ctx.command)
 
     @stickymessage.command(name='setup')
     @commands.has_permissions(manage_messages=True)
     async def sticky_setup(self, ctx: commands.Context, channel: Optional[discord.TextChannel] = None):
+        """Executes the sticky setup command."""
         channel = channel or ctx.channel
         async with aiosqlite.connect("db/stickymessages.db") as db:
             cursor = await db.execute("SELECT 1 FROM sticky_messages WHERE channel_id = ?", (channel.id,))
@@ -152,6 +153,7 @@ class StickyMessage(commands.Cog):
     @stickymessage.command(name='remove', aliases=['delete', 'del'])
     @commands.has_permissions(manage_messages=True)
     async def sticky_remove(self, ctx: commands.Context, channel: Optional[discord.TextChannel] = None):
+        """Executes the sticky remove command."""
         channel = channel or ctx.channel
         async with aiosqlite.connect("db/stickymessages.db") as db:
             cursor = await db.execute("SELECT last_message_id FROM sticky_messages WHERE channel_id = ?", (channel.id,))
@@ -175,6 +177,7 @@ class StickyMessage(commands.Cog):
     @stickymessage.command(name='list')
     @commands.has_permissions(manage_messages=True)
     async def sticky_list(self, ctx: commands.Context):
+        """Executes the sticky list command."""
         async with aiosqlite.connect("db/stickymessages.db") as db:
             db.row_factory = aiosqlite.Row
             cursor = await db.execute("SELECT * FROM sticky_messages WHERE guild_id = ?", (ctx.guild.id,))
@@ -197,6 +200,7 @@ class StickyMessage(commands.Cog):
     @stickymessage.command(name='edit')
     @commands.has_permissions(manage_messages=True)
     async def sticky_edit(self, ctx: commands.Context, channel: Optional[discord.TextChannel] = None):
+        """Executes the sticky edit command."""
         channel = channel or ctx.channel
         async with aiosqlite.connect("db/stickymessages.db") as db:
             db.row_factory = aiosqlite.Row

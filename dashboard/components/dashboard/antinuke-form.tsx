@@ -5,12 +5,9 @@
  * ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
  * ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
  * ║                                                                  ║
- * ║           © 2026 CodeX Devs — All Rights Reserved               ║
+ * ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
  * ║                                                                  ║
- * ║   discord  ──  https://discord.gg/codexdev                      ║
- * ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
- * ║   github   ──  https://github.com/RayExo                        ║
- * ║                                                                  ║
+    * ║                                                                  ║
  * ╚══════════════════════════════════════════════════════════════════╝
  */
 
@@ -224,7 +221,7 @@ export function AntiNukeForm({ initialConfig, guildId }: AntiNukeFormProps) {
               <ShieldAlert className="h-32 w-32 text-red-500" />
             </div>
             <h3 className="text-sm font-bold text-red-400 mb-2">Maximum Protection</h3>
-            <p className="text-xs text-slate-400 leading-relaxed mb-4">Anti-Nuke is fixed to instantly Ban malicious actors. Ensure that Zyrox&apos;s role is at the TOP of the role hierarchy for it to be able to ban admins.</p>
+            <p className="text-xs text-slate-400 leading-relaxed mb-4">Anti-Nuke is fixed to instantly Ban malicious actors. Ensure that ShikshaBot&apos;s role is at the TOP of the role hierarchy for it to be able to ban admins.</p>
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
               <span className="text-[10px] font-black uppercase text-red-500">Fixed Punishments</span>

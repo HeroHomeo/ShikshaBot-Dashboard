@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -16,7 +13,7 @@ import discord
 from utils.emoji import ARROWRED, CROSS, DISABLE, ENABLE, MANAGER, TICK
 from discord.ext import commands
 from discord.ui import LayoutView, TextDisplay, Separator, Container
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 from utils.Tools import *
 from utils.cv2 import CV2, build_container
 

@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -28,7 +25,7 @@ import datetime
 import re 
 from typing import *
 from time import strftime 
-from core import Cog ,zyrox ,Context 
+from core import Cog ,shikshabot ,Context 
 from discord.ui import LayoutView, TextDisplay, Separator, Container
 from utils.cv2 import CV2, build_container
 
@@ -49,7 +46,7 @@ datefmt ="%H:%M:%S",
 )
 
 class Booster (Cog ):
-    def __init__ (self ,bot : Zyrox ):
+    def __init__ (self ,bot : ShikshaBot ):
         self .bot =bot 
         self .color =0xFF0000 
         self .db_path ="db/boost.db"
@@ -68,7 +65,8 @@ class Booster (Cog ):
 
  
     async def setup_database (self ):
-        """Initialize boost database tables"""
+        """
+Initialize boost database tables"""
         async with aiosqlite .connect (self .db_path )as db :
             await db .execute ("""
                 CREATE TABLE IF NOT EXISTS boost_config (
@@ -79,7 +77,8 @@ class Booster (Cog ):
             await db .commit ()
 
     async def get_boost_config (self ,guild_id :int )->dict :
-        """Get boost configuration for a guild"""
+        """
+Get boost configuration for a guild"""
         async with aiosqlite .connect (self .db_path )as db :
             async with db .execute ("SELECT config FROM boost_config WHERE guild_id = ?",(guild_id ,))as cursor :
                 row =await cursor .fetchone ()
@@ -105,7 +104,8 @@ class Booster (Cog ):
                 return default_config 
 
     async def update_boost_config (self ,guild_id :int ,config :dict ):
-        """Update boost configuration for a guild"""
+        """
+Update boost configuration for a guild"""
         async with aiosqlite .connect (self .db_path )as db :
             await db .execute (
             "INSERT OR REPLACE INTO boost_config (guild_id, config) VALUES (?, ?)",
@@ -114,7 +114,8 @@ class Booster (Cog ):
             await db .commit ()
 
     def is_authorized (self ,ctx )->bool :
-        """Check if user is authorized to use admin commands"""
+        """
+Check if user is authorized to use admin commands"""
         return (
         ctx .author ==ctx .guild .owner 
         or ctx .author .guild_permissions .administrator 
@@ -123,7 +124,8 @@ class Booster (Cog ):
 
 
     def format_boost_message (self ,message :str ,user :discord .Member ,guild :discord .Guild )->str :
-        """Format boost message with new variable style"""
+        """
+Format boost message with new variable style"""
         replacements ={
 
         "{server.name}":guild .name ,
@@ -155,7 +157,8 @@ class Booster (Cog ):
         return message 
 
     async def send_permission_error (self ,ctx ):
-        """Send permission error embed"""
+        """
+Send permission error embed"""
         await ctx.send(view=CV2("Permission Error", "```diff\n- You must have Administrator permission.\n- Your top role should be above my top role.\n```"))
 
     @commands .group (name ="boost",aliases =['bst'],invoke_without_command =True ,help ="Boost message configuration commands")
@@ -166,6 +169,7 @@ class Booster (Cog ):
     @commands .guild_only ()
     @commands .has_permissions (administrator =True )
     async def _boost (self ,ctx ):
+        """Executes the  boost command."""
         if ctx .subcommand_passed is None :
             await ctx .send_help (ctx .command )
             ctx .command .reset_cooldown (ctx )
@@ -178,6 +182,7 @@ class Booster (Cog ):
     @commands .guild_only ()
     @commands .has_permissions (administrator =True )
     async def _boost_thumbnail (self ,ctx ,thumbnail_url :str ):
+        """Executes the  boost thumbnail command."""
         if not self .is_authorized (ctx ):
             await self .send_permission_error (ctx )
             return 
@@ -201,6 +206,7 @@ class Booster (Cog ):
     @commands .guild_only ()
     @commands .has_permissions (administrator =True )
     async def _boost_image (self ,ctx ,*,image_url :str ):
+        """Executes the  boost image command."""
         if not self .is_authorized (ctx ):
             await self .send_permission_error (ctx )
             return 
@@ -224,6 +230,7 @@ class Booster (Cog ):
     @commands .guild_only ()
     @commands .has_permissions (administrator =True )
     async def _boost_autodel (self ,ctx ,seconds :int ):
+        """Executes the  boost autodel command."""
         if not self .is_authorized (ctx ):
             await self .send_permission_error (ctx )
             return 
@@ -251,6 +258,7 @@ class Booster (Cog ):
     @commands .guild_only ()
     @commands .has_permissions (administrator =True )
     async def _boost_message (self ,ctx ):
+        """Executes the  boost message command."""
         if not self .is_authorized (ctx ):
             await self .send_permission_error (ctx )
             return 
@@ -303,6 +311,7 @@ class Booster (Cog ):
     @commands .guild_only ()
     @commands .has_permissions (administrator =True )
     async def _boost_embed (self ,ctx ):
+        """Executes the  boost embed command."""
         if not self .is_authorized (ctx ):
             await self .send_permission_error (ctx )
             return 
@@ -322,6 +331,7 @@ class Booster (Cog ):
     @commands .guild_only ()
     @commands .has_permissions (administrator =True )
     async def _boost_ping (self ,ctx ):
+        """Executes the  boost ping command."""
         if not self .is_authorized (ctx ):
             await self .send_permission_error (ctx )
             return 
@@ -340,6 +350,7 @@ class Booster (Cog ):
     @commands .guild_only ()
     @commands .has_permissions (administrator =True )
     async def _boost_channel (self ,ctx ):
+        """Executes the  boost channel command."""
         if ctx .subcommand_passed is None :
             await ctx .send_help (ctx .command )
             ctx .command .reset_cooldown (ctx )
@@ -352,6 +363,7 @@ class Booster (Cog ):
     @commands .guild_only ()
     @commands .has_permissions (administrator =True )
     async def _boost_channel_add (self ,ctx ,channel :discord .TextChannel ):
+        """Executes the  boost channel add command."""
         if not self .is_authorized (ctx ):
             await self .send_permission_error (ctx )
             return 
@@ -380,6 +392,7 @@ class Booster (Cog ):
     @commands .guild_only ()
     @commands .has_permissions (administrator =True )
     async def _boost_channel_remove (self ,ctx ,channel :discord .TextChannel ):
+        """Executes the  boost channel remove command."""
         if not self .is_authorized (ctx ):
             await self .send_permission_error (ctx )
             return 
@@ -406,6 +419,7 @@ class Booster (Cog ):
     @commands .guild_only ()
     @commands .has_permissions (administrator =True )
     async def _boost_test (self ,ctx ):
+        """Executes the  boost test command."""
         data =await self .get_boost_config (ctx .guild .id )
         channels =data ["boost"]["channel"]
 
@@ -455,6 +469,7 @@ class Booster (Cog ):
     @ignore_check ()
     @commands .has_permissions (administrator =True )
     async def _boost_config (self ,ctx ):
+        """Executes the  boost config command."""
         data =await self .get_boost_config (ctx .guild .id )
         channels =data ["boost"]["channel"]
 
@@ -492,6 +507,7 @@ class Booster (Cog ):
     @ignore_check ()
     @commands .has_permissions (administrator =True )
     async def _boost_reset (self ,ctx ):
+        """Executes the  boost reset command."""
         if not self .is_authorized (ctx ):
             await self .send_permission_error (ctx )
             return 
@@ -523,6 +539,7 @@ class Booster (Cog ):
     @commands .guild_only ()
     @commands .has_permissions (administrator =True )
     async def _boostrole (self ,ctx ):
+        """Executes the  boostrole command."""
         if ctx .subcommand_passed is None :
             await ctx .send_help (ctx .command )
             ctx .command .reset_cooldown (ctx )
@@ -535,6 +552,7 @@ class Booster (Cog ):
     @ignore_check ()
     @commands .has_permissions (administrator =True )
     async def _boostrole_config (self ,ctx ):
+        """Executes the  boostrole config command."""
         data =await self .get_boost_config (ctx .guild .id )
         role_ids =data ["boost_roles"]["roles"]
 
@@ -559,6 +577,7 @@ class Booster (Cog ):
     @commands .guild_only ()
     @commands .has_permissions (administrator =True )
     async def _boostrole_add (self ,ctx ,role :discord .Role ):
+        """Executes the  boostrole add command."""
         if not self .is_authorized (ctx ):
             await self .send_permission_error (ctx )
             return 
@@ -587,6 +606,7 @@ class Booster (Cog ):
     @commands .guild_only ()
     @commands .has_permissions (administrator =True )
     async def _boostrole_remove (self ,ctx ,role :discord .Role ):
+        """Executes the  boostrole remove command."""
         if not self .is_authorized (ctx ):
             await self .send_permission_error (ctx )
             return 
@@ -615,6 +635,7 @@ class Booster (Cog ):
     @ignore_check ()
     @commands .has_permissions (administrator =True )
     async def _boostrole_reset (self ,ctx ):
+        """Executes the  boostrole reset command."""
         if not self .is_authorized (ctx ):
             await self .send_permission_error (ctx )
             return 

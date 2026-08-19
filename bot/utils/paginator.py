@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -144,25 +141,24 @@ class Paginator(discord.ui.View):
         """
         Update the button styles and emojis
         """
-
-        # Update the button emojis
-        self.first_page_button.emoji = kwargs.get('first_button_emoji') or REWIND
+        # Update the button emojis to clean unicode ones
+        self.first_page_button.emoji = kwargs.get('first_button_emoji') or "⏮️"
         self.previous_page_button.emoji = kwargs.get(
-            'previous_button_emoji') or PREVIOUS
-        self.next_page_button.emoji = kwargs.get('next_button_emoji') or NEXT
-        self.last_page_button.emoji = kwargs.get('last_button_emoji') or FORWARD
+            'previous_button_emoji') or "◀️"
+        self.next_page_button.emoji = kwargs.get('next_button_emoji') or "▶️"
+        self.last_page_button.emoji = kwargs.get('last_button_emoji') or "⏭️"
         self.stop_button.emoji = kwargs.get(
-            'stop_button_emoji') or DELETE
+            'stop_button_emoji') or "🗑️"
 
-        # Update the Button Styles
+        # Update the Button Styles for a cool contrast
         self.first_page_button.style = kwargs.get(
             'first_button_style') or ButtonStyle.secondary
         self.previous_page_button.style = kwargs.get(
-            'previous_button_style') or ButtonStyle.secondary
+            'previous_button_style') or ButtonStyle.primary
         self.stop_button.style = kwargs.get(
-            'stop_button_style') or ButtonStyle.red
+            'stop_button_style') or ButtonStyle.danger
         self.next_page_button.style = kwargs.get(
-            'next_button_style') or ButtonStyle.secondary
+            'next_button_style') or ButtonStyle.primary
         self.last_page_button.style = kwargs.get(
             'last_button_style') or ButtonStyle.secondary
 
@@ -196,19 +192,22 @@ class Paginator(discord.ui.View):
     @discord.ui.button()
     async def first_page_button(self, interaction: discord.Interaction,
                                 button: discord.ui.Button):
-        """Go to the first page"""
+        """
+Go to the first page"""
         await self.show_page(interaction, 0)
 
     @discord.ui.button()
     async def previous_page_button(self, interaction: discord.Interaction,
                                    button: discord.ui.Button):
-        """Go to the previous page"""
+        """
+Go to the previous page"""
         await self.show_checked_page(interaction, self.current_page - 1)
 
     @discord.ui.button()
     async def stop_button(self, interaction: discord.Interaction,
                           button: discord.ui.Button):
-        """Stops the pagination session."""
+        """
+Stops the pagination session."""
         await interaction.response.defer()
         await interaction.delete_original_response()
         self.stop()
@@ -216,11 +215,13 @@ class Paginator(discord.ui.View):
     @discord.ui.button()
     async def next_page_button(self, interaction: discord.Interaction,
                                button: discord.ui.Button):
-        """Go to the next page"""
+        """
+Go to the next page"""
         await self.show_checked_page(interaction, self.current_page + 1)
 
     @discord.ui.button()
     async def last_page_button(self, interaction: discord.Interaction,
                                button: discord.ui.Button):
-        """Go to the last page"""
+        """
+Go to the last page"""
         await self.show_page(interaction, self.source.get_max_pages() - 1)

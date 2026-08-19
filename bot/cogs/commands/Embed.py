@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -106,7 +103,8 @@ class EmbedBuilder(ui.LayoutView):
         self.container.add_item(ui.ActionRow(send_btn, cancel_btn))
 
     def _build_embed(self):
-        """Build a real discord.Embed from stored data"""
+        """
+Build a real discord.Embed from stored data"""
         d = self.embed_data
         embed = discord.Embed(
             title=d["title"],
@@ -262,5 +260,7 @@ class Embed(commands.Cog):
     @commands.cooldown(1, 7, commands.BucketType.user)
     @commands.has_permissions(manage_messages=True)
     async def _embed(self, ctx):
+        """
+Executes the  embed command."""
         view = EmbedBuilder(ctx)
         view.message = await ctx.send(view=view)

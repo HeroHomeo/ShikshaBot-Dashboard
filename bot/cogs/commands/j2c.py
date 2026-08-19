@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -16,7 +13,7 @@ import discord
 from discord.ext import commands
 from discord import ui, SelectOption
 from discord.ui import LayoutView, TextDisplay, Separator, ActionRow
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import asyncio
 from typing import Dict, List, Optional
 from utils.cv2 import CV2, build_container
@@ -164,6 +161,7 @@ class JoinToCreate(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        """Executes the on ready command."""
         await self.init_db()
         await self.load_data()
         for guild_id, data in self.setup_data.items():
@@ -194,6 +192,8 @@ class JoinToCreate(commands.Cog):
     @commands.command(name='j2csetup')
     @commands.has_permissions(administrator=True)
     async def setup_private_channels(self, ctx):
+        """
+Executes the setup private channels command."""
         if ctx.guild.id in self.setup_data:
             await ctx.send(view=CV2("❌ Error", "J2C system is already setup in this server!"))
             return
@@ -229,6 +229,8 @@ class JoinToCreate(commands.Cog):
     @commands.command(name='j2creset')
     @commands.has_permissions(administrator=True)
     async def reset_private_channels(self, ctx):
+        """
+Executes the reset private channels command."""
         if ctx.guild.id not in self.setup_data:
             await ctx.send(view=CV2("❌ Error", "J2C system is not setup in this server!"))
             return
@@ -259,6 +261,7 @@ class JoinToCreate(commands.Cog):
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
+        """Executes the on voice state update command."""
         if member.guild.id not in self.setup_data:
             return
             
@@ -379,35 +382,39 @@ class ControlPanelView(LayoutView):
         )
         self.add_item(container)
 
-        b_limit = ui.Button(label="LIMIT", style=discord.ButtonStyle.blurple, custom_id="j2c:limit", emoji="⏳")
-        b_limit.callback = self.set_limit
-        b_privacy = ui.Button(label="PRIVACY", style=discord.ButtonStyle.blurple, custom_id="j2c:privacy", emoji="🔒")
+        # Row 1: Settings (Secondary / Grey)
+        b_privacy = ui.Button(label="Privacy", style=discord.ButtonStyle.secondary, custom_id="j2c:privacy", emoji="🔒")
         b_privacy.callback = self.toggle_privacy
-        b_thread = ui.Button(label="THREAD", style=discord.ButtonStyle.blurple, custom_id="j2c:thread", emoji="💬")
+        b_limit = ui.Button(label="Limit", style=discord.ButtonStyle.secondary, custom_id="j2c:limit", emoji="👥")
+        b_limit.callback = self.set_limit
+        b_thread = ui.Button(label="Thread", style=discord.ButtonStyle.secondary, custom_id="j2c:thread", emoji="💬")
         b_thread.callback = self.create_thread
-        b_untrust = ui.Button(label="UNTRUST", style=discord.ButtonStyle.green, custom_id="j2c:untrust", emoji="❌")
-        b_untrust.callback = self.untrust
-        b_invite = ui.Button(label="INVITE", style=discord.ButtonStyle.green, custom_id="j2c:invite", emoji="✉️")
-        b_invite.callback = self.invite_user
-        b_kick = ui.Button(label="KICK", style=discord.ButtonStyle.green, custom_id="j2c:kick", emoji="👢")
-        b_kick.callback = self.kick_user
-        b_region = ui.Button(label="REGION", style=discord.ButtonStyle.green, custom_id="j2c:region", emoji="🌍")
+        b_region = ui.Button(label="Region", style=discord.ButtonStyle.secondary, custom_id="j2c:region", emoji="🌍")
         b_region.callback = self.set_region
-        b_unblock = ui.Button(label="UNBLOCK", style=discord.ButtonStyle.red, custom_id="j2c:unblock", emoji="🔓")
-        b_unblock.callback = self.unblock
-        b_claim = ui.Button(label="CLAIM", style=discord.ButtonStyle.red, custom_id="j2c:claim", emoji="⭐")
-        b_claim.callback = self.claim
-        b_transfer = ui.Button(label="TRANSFER", style=discord.ButtonStyle.red, custom_id="j2c:transfer", emoji="🔄")
-        b_transfer.callback = self.transfer
-        b_delete = ui.Button(label="DELETE", style=discord.ButtonStyle.red, custom_id="j2c:delete", emoji="🗑️")
-        b_delete.callback = self.delete_vc
-        b_block = ui.Button(label="BLOCK", style=discord.ButtonStyle.danger, custom_id="j2c:block", emoji="🚫")
-        b_block.callback = self.block
 
-        self.add_item(ActionRow(b_limit, b_privacy, b_thread))
-        self.add_item(ActionRow(b_untrust, b_invite, b_kick, b_region))
-        self.add_item(ActionRow(b_unblock, b_claim, b_transfer, b_delete))
-        self.add_item(ActionRow(b_block))
+        # Row 2: User Management (Primary / Blurple)
+        b_invite = ui.Button(label="Invite", style=discord.ButtonStyle.primary, custom_id="j2c:invite", emoji="✉️")
+        b_invite.callback = self.invite_user
+        b_block = ui.Button(label="Block", style=discord.ButtonStyle.primary, custom_id="j2c:block", emoji="🚫")
+        b_block.callback = self.block
+        b_unblock = ui.Button(label="Unblock", style=discord.ButtonStyle.primary, custom_id="j2c:unblock", emoji="🔓")
+        b_unblock.callback = self.unblock
+        b_kick = ui.Button(label="Kick", style=discord.ButtonStyle.primary, custom_id="j2c:kick", emoji="👢")
+        b_kick.callback = self.kick_user
+        b_untrust = ui.Button(label="Untrust", style=discord.ButtonStyle.primary, custom_id="j2c:untrust", emoji="❌")
+        b_untrust.callback = self.untrust
+
+        # Row 3: Ownership & Danger (Danger / Red)
+        b_claim = ui.Button(label="Claim", style=discord.ButtonStyle.danger, custom_id="j2c:claim", emoji="👑")
+        b_claim.callback = self.claim
+        b_transfer = ui.Button(label="Transfer", style=discord.ButtonStyle.danger, custom_id="j2c:transfer", emoji="🔄")
+        b_transfer.callback = self.transfer
+        b_delete = ui.Button(label="Delete VC", style=discord.ButtonStyle.danger, custom_id="j2c:delete", emoji="🗑️")
+        b_delete.callback = self.delete_vc
+
+        self.add_item(ActionRow(b_privacy, b_limit, b_thread, b_region))
+        self.add_item(ActionRow(b_invite, b_block, b_unblock, b_kick, b_untrust))
+        self.add_item(ActionRow(b_claim, b_transfer, b_delete))
     
     async def get_owned_vc(self, interaction: discord.Interaction) -> Optional[discord.VoiceChannel]:
         for vc_id, data in self.cog.private_channels.items():

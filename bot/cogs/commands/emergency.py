@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -16,7 +13,7 @@ import discord
 from utils.emoji import CROSS, CROSS_ALT, ML_CROSS, TICK, TICK_ALT, ZWARNING
 from discord.ui import LayoutView, TextDisplay, Separator, Container, Button, ActionRow
 from discord.ext import commands
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 from utils.Tools import *
 from utils.cv2 import CV2, build_container
 from utils.config import OWNER_IDS_STR
@@ -412,6 +409,8 @@ class Emergency(commands.Cog):
     @commands.cooldown(1, 4, commands.BucketType.user)
     @commands.guild_only()
     async def emergency(self, ctx):
+        """
+Executes the emergency command."""
         await ctx.reply(view=EmergencyMainView(ctx, ctx.prefix))
 
     @emergency.command(name="enable")
@@ -420,6 +419,7 @@ class Emergency(commands.Cog):
     @commands.cooldown(1, 4, commands.BucketType.user)
     @commands.guild_only()
     async def enable(self, ctx):
+        """Executes the enable command."""
         if ctx.author.id != ctx.guild.owner_id and str(ctx.author.id) not in OWNER_IDS_STR:
             return await ctx.reply(view=EnableErrorView())
         dangerous_perms = [
@@ -459,6 +459,7 @@ class Emergency(commands.Cog):
     @commands.cooldown(1, 4, commands.BucketType.user)
     @commands.guild_only()
     async def disable(self, ctx):
+        """Executes the disable command."""
         if ctx.author.id != ctx.guild.owner_id and str(ctx.author.id) not in OWNER_IDS_STR:
             return await ctx.reply(view=DisableErrorView())
         async with aiosqlite.connect(self.db_path) as db:
@@ -473,6 +474,7 @@ class Emergency(commands.Cog):
     @ignore_check()
     @commands.guild_only()
     async def authorise(self, ctx):
+        """Executes the authorise command."""
         if ctx.subcommand_passed is None:
             await ctx.send_help(ctx.command)
             ctx.command.reset_cooldown(ctx)
@@ -482,6 +484,7 @@ class Emergency(commands.Cog):
     @ignore_check()
     @commands.guild_only()
     async def authorise_add(self, ctx, member: discord.Member):
+        """Executes the authorise add command."""
         if not await self.is_guild_owner(ctx):
             return await ctx.reply(view=AuthoriseErrorView("owner_add"))
         async with aiosqlite.connect(self.db_path) as db:
@@ -509,6 +512,7 @@ class Emergency(commands.Cog):
     @ignore_check()
     @commands.guild_only()
     async def authorise_remove(self, ctx, member: discord.Member):
+        """Executes the authorise remove command."""
         if not await self.is_guild_owner(ctx):
             return await ctx.reply(view=AuthoriseErrorView("owner_remove"))
         async with aiosqlite.connect(self.db_path) as db:
@@ -530,6 +534,7 @@ class Emergency(commands.Cog):
     @ignore_check()
     @commands.guild_only()
     async def list_authorized(self, ctx):
+        """Executes the list authorized command."""
         is_owner = await self.is_guild_owner(ctx)
         if not is_owner:
             return await ctx.reply(view=AuthoriseErrorView("owner_list"))
@@ -546,6 +551,7 @@ class Emergency(commands.Cog):
     @ignore_check()
     @commands.guild_only()
     async def role(self, ctx):
+        """Executes the role command."""
         if ctx.subcommand_passed is None:
             await ctx.send_help(ctx.command)
             ctx.command.reset_cooldown(ctx)
@@ -555,6 +561,7 @@ class Emergency(commands.Cog):
     @ignore_check()
     @commands.guild_only()
     async def role_add(self, ctx, role: discord.Role):
+        """Executes the role add command."""
         if not await self.is_guild_owner(ctx):
             return await ctx.reply(view=RoleErrorView("owner_add"))
         async with aiosqlite.connect(self.db_path) as db:
@@ -582,6 +589,7 @@ class Emergency(commands.Cog):
     @ignore_check()
     @commands.guild_only()
     async def role_remove(self, ctx, role: discord.Role):
+        """Executes the role remove command."""
         if not await self.is_guild_owner(ctx):
             return await ctx.reply(view=RoleErrorView("owner_remove"))
         async with aiosqlite.connect(self.db_path) as db:
@@ -603,6 +611,7 @@ class Emergency(commands.Cog):
     @ignore_check()
     @commands.guild_only()
     async def list_roles(self, ctx):
+        """Executes the list roles command."""
         is_auth = await self.is_guild_owner_or_authorised(ctx)
         if not is_auth:
             return await ctx.reply(view=RoleErrorView("owner_list"))
@@ -621,6 +630,8 @@ class Emergency(commands.Cog):
     @commands.guild_only()
     @commands.bot_has_permissions(manage_roles=True)
     async def emergencysituation(self, ctx):
+        """
+Executes the emergencysituation command."""
         if not await self.is_guild_owner_or_authorised(ctx) and str(
             ctx.author.id
         ) not in OWNER_IDS_STR:
@@ -743,6 +754,8 @@ class Emergency(commands.Cog):
     @commands.guild_only()
     @commands.bot_has_permissions(manage_roles=True)
     async def emergencyrestore(self, ctx):
+        """
+Executes the emergencyrestore command."""
         if ctx.author.id != ctx.guild.owner_id and str(ctx.author.id) not in OWNER_IDS_STR:
             return await ctx.reply(view=EmergencyRestoreAccessErrorView())
 

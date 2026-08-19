@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -20,7 +17,7 @@ from discord.ext import commands
 from core import *
 from utils.Tools import *
 from typing import Optional
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 
 color = 0xFF0000
 
@@ -130,6 +127,7 @@ class Ignore(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def _ignore(self, ctx):
+        """Executes the  ignore command."""
         if ctx.subcommand_passed is None:
             await ctx.send_help(ctx.command)
             ctx.command.reset_cooldown(ctx)
@@ -146,6 +144,7 @@ class Ignore(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def _command(self, ctx):
+        """Executes the  command command."""
         if ctx.subcommand_passed is None:
             await ctx.send_help(ctx.command)
             ctx.command.reset_cooldown(ctx)
@@ -267,6 +266,7 @@ class Ignore(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def _channel(self, ctx):
+        """Executes the  channel command."""
         if ctx.subcommand_passed is None:
             await ctx.send_help(ctx.command)
             ctx.command.reset_cooldown(ctx)
@@ -387,6 +387,7 @@ class Ignore(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def _user(self, ctx):
+        """Executes the  user command."""
         if ctx.subcommand_passed is None:
             await ctx.send_help(ctx.command)
             ctx.command.reset_cooldown(ctx)
@@ -499,6 +500,7 @@ class Ignore(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def _bypass(self, ctx):
+        """Executes the  bypass command."""
         if ctx.subcommand_passed is None:
             await ctx.send_help(ctx.command)
             ctx.command.reset_cooldown(ctx)
@@ -587,6 +589,7 @@ class Ignore(commands.Cog):
     @ignore_check()
     @commands.has_permissions(administrator=True)
     async def bypass_show(self, ctx: commands.Context):
+        """Executes the bypass show command."""
         async with aiosqlite.connect(self.db_path) as db:
             cursor = await db.execute(
                 "SELECT user_id FROM bypassed_users WHERE guild_id = ?", (ctx.guild.id,)

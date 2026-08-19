@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -49,7 +46,8 @@ def utc_to_ist (dt :datetime )->datetime :
 
 
 async def check_bot_permissions (guild :discord .Guild ,channel =None )->dict :
-    """Check if bot has necessary permissions"""
+    """
+Check if bot has necessary permissions"""
     bot_member =guild .me 
     required_perms ={
     'guild':['manage_roles','manage_channels','send_messages','manage_messages'],
@@ -74,12 +72,14 @@ async def check_bot_permissions (guild :discord .Guild ,channel =None )->dict :
 
 
 def validate_role_hierarchy (guild :discord .Guild ,role :discord .Role )->bool :
-    """Check if bot can manage the specified role"""
+    """
+Check if bot can manage the specified role"""
     bot_top_role =guild .me .top_role 
     return bot_top_role .position >role .position 
 
 async def create_verified_role (guild :discord .Guild )->discord .Role :
-    """Create a verified role with proper permissions"""
+    """
+Create a verified role with proper permissions"""
     try :
 
         existing_role =discord .utils .get (guild .roles ,name ="Verified")
@@ -119,7 +119,8 @@ async def create_verified_role (guild :discord .Guild )->discord .Role :
         raise 
 
 async def auto_fix_permissions (guild :discord .Guild ,verification_channel :discord .TextChannel ,verified_role :discord .Role ):
-    """Automatically fix channel permissions for verification system"""
+    """
+Automatically fix channel permissions for verification system"""
     try :
         everyone_role =guild .default_role 
         bot_member =guild .me 
@@ -519,12 +520,13 @@ class VerificationView (discord .ui .View ):
             await interaction .response .send_message (embed =embed ,ephemeral =True )
 
     def generate_captcha_code (self )->str :
-        """Generate a random 6-character alphanumeric code"""
+        """
+Generate a random 6-character alphanumeric code"""
         return ''.join (random .choices (string .ascii_letters +string .digits ,k =6 ))
 
     def create_captcha_image (self ,code :str )->io .BytesIO :
-        """Create a CAPTCHA image with the given code"""
-
+        """
+Create a CAPTCHA image with the given code"""
         width ,height =300 ,120 
         image =Image .new ('RGB',(width ,height ),color ='white')
         draw =ImageDraw .Draw (image )
@@ -700,12 +702,13 @@ class CaptchaOnlyVerificationView (discord .ui .View ):
             await interaction .response .send_message (embed =embed ,ephemeral =True )
 
     def generate_captcha_code (self )->str :
-        """Generate a random 6-character alphanumeric code"""
+        """
+Generate a random 6-character alphanumeric code"""
         return ''.join (random .choices (string .ascii_letters +string .digits ,k =6 ))
 
     def create_captcha_image (self ,code :str )->io .BytesIO :
-        """Create a CAPTCHA image with the given code"""
-
+        """
+Create a CAPTCHA image with the given code"""
         width ,height =300 ,120 
         image =Image .new ('RGB',(width ,height ),color ='white')
         draw =ImageDraw .Draw (image )
@@ -860,7 +863,8 @@ class VerificationSetupView (discord .ui .View ):
             async with aiosqlite .connect (DATABASE_PATH )as db :
                 async with db .cursor ()as cur :
                     await cur .execute (
-                    """INSERT OR REPLACE INTO verification_config 
+                    """
+INSERT OR REPLACE INTO verification_config 
                            (guild_id, verification_channel_id, verified_role_id, log_channel_id, verification_method, enabled) 
                            VALUES (?, ?, ?, ?, ?, ?)""",
                     (
@@ -946,7 +950,8 @@ class VerificationSetupView (discord .ui .View ):
             await interaction .followup .send (embed =embed ,ephemeral =True )
 
     async def send_verification_panel (self ,verified_role :discord .Role ):
-        """Send the verification panel to the verification channel"""
+        """
+Send the verification panel to the verification channel"""
         try :
             channel =self .verification_channel 
             current_time =utc_to_ist (discord .utils .utcnow ())
@@ -1091,7 +1096,8 @@ class Verification (commands .Cog ):
         self .bot .add_view (CaptchaOnlyVerificationView (self .bot ))
 
     async def create_tables (self ):
-        """Create database tables for verification system"""
+        """
+Create database tables for verification system"""
         try :
             async with aiosqlite .connect (DATABASE_PATH )as db :
                 await db .execute ("""
@@ -1124,7 +1130,8 @@ class Verification (commands .Cog ):
 
     @commands .Cog .listener ()
     async def on_message (self ,message ):
-        """Auto-delete messages in verification channel from non-bot users"""
+        """
+Auto-delete messages in verification channel from non-bot users"""
         if message .author .bot :
             return 
 
@@ -1160,6 +1167,7 @@ class Verification (commands .Cog ):
     @commands .hybrid_group (name ="verification",invoke_without_command =True ,description ="Advanced verification system management.")
     @commands .has_permissions (administrator =True )
     async def verification (self ,ctx ):
+        """Executes the verification command."""
         await ctx .send_help (ctx .command )
 
     @verification .command (name ="setup",description ="Set up the advanced verification system.")
@@ -1167,6 +1175,7 @@ class Verification (commands .Cog ):
     @ignore_check ()
     @commands .has_permissions (administrator =True )
     async def verification_setup (self ,ctx ):
+        """Executes the verification setup command."""
         try :
 
             missing_perms =await check_bot_permissions (ctx .guild )
@@ -1212,11 +1221,13 @@ class Verification (commands .Cog ):
     @ignore_check ()
     @commands .has_permissions (administrator =True )
     async def verification_status (self ,ctx ):
+        """Executes the verification status command."""
         try :
             async with aiosqlite .connect (DATABASE_PATH )as db :
                 async with db .cursor ()as cur :
                     await cur .execute (
-                    """SELECT verification_channel_id, verified_role_id, log_channel_id, 
+                    """
+SELECT verification_channel_id, verified_role_id, log_channel_id, 
                                   verification_method, enabled FROM verification_config 
                            WHERE guild_id = ?""",
                     (ctx .guild .id ,)
@@ -1246,7 +1257,8 @@ class Verification (commands .Cog ):
                     total_verifications =(await cur .fetchone ())[0 ]
 
                     await cur .execute (
-                    """SELECT verification_method, COUNT(*) FROM verification_logs 
+                    """
+SELECT verification_method, COUNT(*) FROM verification_logs 
                            WHERE guild_id = ? GROUP BY verification_method""",
                     (ctx .guild .id ,)
                     )
@@ -1339,6 +1351,8 @@ class Verification (commands .Cog ):
     @ignore_check ()
     @commands .has_permissions (administrator =True )
     async def verification_fix (self ,ctx ):
+        """Executes the verification fix command."""
+        await ctx.defer(ephemeral=True)
         try :
             async with aiosqlite .connect (DATABASE_PATH )as db :
                 async with db .cursor ()as cur :
@@ -1403,6 +1417,7 @@ class Verification (commands .Cog ):
     @ignore_check ()
     @commands .has_permissions (administrator =True )
     async def verification_disable (self ,ctx ):
+        """Executes the verification disable command."""
         try :
             async with aiosqlite .connect (DATABASE_PATH )as db :
                 async with db .cursor ()as cur :
@@ -1476,6 +1491,7 @@ class Verification (commands .Cog ):
     @ignore_check ()
     @commands .has_permissions (administrator =True )
     async def verification_enable (self ,ctx ):
+        """Executes the verification enable command."""
         try :
             async with aiosqlite .connect (DATABASE_PATH )as db :
                 async with db .cursor ()as cur :
@@ -1533,6 +1549,7 @@ class Verification (commands .Cog ):
     @ignore_check ()
     @commands .has_permissions (administrator =True )
     async def verification_logs (self ,ctx ,limit :int =10 ):
+        """Executes the verification logs command."""
         try :
             if limit >50 :
                 limit =50 
@@ -1540,7 +1557,8 @@ class Verification (commands .Cog ):
             async with aiosqlite .connect (DATABASE_PATH )as db :
                 async with db .cursor ()as cur :
                     await cur .execute (
-                    """SELECT user_id, verification_method, verified_at 
+                    """
+SELECT user_id, verification_method, verified_at 
                            FROM verification_logs WHERE guild_id = ? 
                            ORDER BY verified_at DESC LIMIT ?""",
                     (ctx .guild .id ,limit )
@@ -1577,6 +1595,7 @@ class Verification (commands .Cog ):
     @ignore_check ()
     @commands .has_permissions (administrator =True )
     async def verification_reset (self ,ctx ):
+        """Executes the verification reset command."""
         try :
             embed =discord .Embed (
             title ="Reset Channel Permissions",
@@ -1651,6 +1670,7 @@ class Verification (commands .Cog ):
     @ignore_check ()
     @commands .has_permissions (administrator =True )
     async def verification_verify (self ,ctx ,user :discord .Member ):
+        """Executes the verification verify command."""
         try :
             async with aiosqlite .connect (DATABASE_PATH )as db :
                 async with db .cursor ()as cur :

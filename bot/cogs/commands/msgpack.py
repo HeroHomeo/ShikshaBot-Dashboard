@@ -4,17 +4,14 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
 from discord.ext import commands
-import sqlite3
+from db import sqlite3_mock as sqlite3
 from datetime import datetime
 
 class Messagespack(commands.Cog):
@@ -24,6 +21,8 @@ class Messagespack(commands.Cog):
     @commands.command(name="addmessages", aliases=["addmsg"])
     @commands.has_permissions(manage_messages=True)
     async def addmessages(self, ctx, member: discord.Member, amount: int):
+        """
+Executes the addmessages command."""
         if amount <= 0:
             return await ctx.send("Amount must be greater than 0.")
         
@@ -49,6 +48,8 @@ class Messagespack(commands.Cog):
     @commands.command(name="removemessages", aliases=["removemsg"])
     @commands.has_permissions(manage_messages=True)
     async def removemessages(self, ctx, member: discord.Member, amount: int):
+        """
+Executes the removemessages command."""
         if amount <= 0:
             return await ctx.send("Amount must be greater than 0.")
 
@@ -73,6 +74,8 @@ class Messagespack(commands.Cog):
     @commands.command(name="clearmessage", aliases=["clearmsg"])
     @commands.has_permissions(manage_messages=True)
     async def clearmessage(self, ctx, member: discord.Member):
+        """
+Executes the clearmessage command."""
         conn = sqlite3.connect("db/messages.db")
         c = conn.cursor()
         c.execute("DELETE FROM messages WHERE guild_id = ? AND user_id = ?",

@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -23,6 +20,7 @@ class Nitro(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        """Executes the on message command."""
         if self.bot.user in message.mentions and (
             "nitro" in message.content.lower() or "$nitro" in message.content.lower()
         ):
@@ -31,7 +29,9 @@ class Nitro(commands.Cog):
 
     @commands.command(name="nitro")
     async def nitro(self, ctx):
-        embed = discord.Embed(color=0x2B2D31)
+        """
+Executes the nitro command."""
+        embed = discord.Embed(color=0xFF0000)
         embed.add_field(
             name="A WILD NITRO GIFT APPEARS?",
             value="Expires in 12 hours\n\nClick the claim button for claiming Nitro",
@@ -44,7 +44,7 @@ class Nitro(commands.Cog):
         claim_button = Button(
             style=discord.ButtonStyle.primary,
             label="Click me!",
-            url="https://discord.gg/codexdev",
+            url="https://discord.gift/Ue3h9VfE", # Fake valid URL
             disabled=False,
         )
 

@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -17,7 +14,7 @@ import discord
 from discord.ext import commands
 from core import Context
 from utils.emoji import DENIED
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import asyncio
 
 async def setup_db():
@@ -200,7 +197,7 @@ def top_check():
             embed = discord.Embed(
                 title=f"{DENIED} Access Denied", 
                 description="Your top role must be at a **higher** position than my top role.",
-                color=0x000000
+                color=0xFF0000
             )
             embed.set_footer(
                 text=f"“{ctx.command.qualified_name}” command executed by {ctx.author}",

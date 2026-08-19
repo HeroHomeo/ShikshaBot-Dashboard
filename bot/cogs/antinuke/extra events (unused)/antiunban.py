@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 from datetime import timedelta, datetime
 import asyncio
 
@@ -26,6 +26,7 @@ class AntiUnban(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_unban(self, guild, user):
+        """Executes the on member unban command."""
         async with aiosqlite.connect('db/anti.db') as db:
             async with db.execute("SELECT status FROM antinuke WHERE guild_id = ?", (guild.id,)) as cursor:
                 antinuke_status = await cursor.fetchone()

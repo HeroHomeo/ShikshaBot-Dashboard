@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -242,8 +239,8 @@ def add_action_rows(container, components):
 
 
 class LogSetupView(View):
-    """Enhanced view for configuring logging settings with improved UI."""
-
+    """
+Enhanced view for configuring logging settings with improved UI."""
     def __init__(self, bot: commands.Bot, author: discord.Member, timeout: float = 300):
         super().__init__(timeout=timeout)
         self.bot = bot
@@ -255,7 +252,8 @@ class LogSetupView(View):
         self.current_step = 0
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        """Ensure only the command author can interact."""
+        """
+Ensure only the command author can interact."""
         if interaction.user != self.author:
             try:
                 if not interaction.response.is_done():
@@ -269,7 +267,8 @@ class LogSetupView(View):
         return True
 
     async def on_timeout(self):
-        """Handle view timeout with proper cleanup."""
+        """
+Handle view timeout with proper cleanup."""
         if self.message:
             try:
                 for item in self.children:
@@ -286,7 +285,8 @@ class LogSetupView(View):
 
     @discord.ui.select(placeholder="Choose a logging category to configure...")
     async def category_select(self, interaction: discord.Interaction, select: Select):
-        """Handle category selection in setup."""
+        """
+Handle category selection in setup."""
         try:
             if select.values[0] == "finish":
                 await self.finish_setup(interaction)
@@ -316,11 +316,13 @@ class LogSetupView(View):
 
     @discord.ui.button(label="Finish Setup", style=discord.ButtonStyle.success)
     async def finish_button(self, interaction: discord.Interaction, button: Button):
-        """Finish the setup process."""
+        """
+Finish the setup process."""
         await self.finish_setup(interaction)
 
     async def finish_setup(self, interaction: discord.Interaction):
-        """Complete the setup process."""
+        """
+Complete the setup process."""
         try:
             log_enabled = {
                 cat: bool(self.selected_channels.get(cat)) for cat in LOG_CATEGORIES
@@ -374,8 +376,8 @@ class LogSetupView(View):
 
 
 class InteractiveConfigView(View):
-    """Fully interactive configuration view for all logging settings."""
-
+    """
+Fully interactive configuration view for all logging settings."""
     def __init__(self, bot: commands.Bot, author: discord.Member, config: Dict):
         super().__init__(timeout=300)
         self.bot = bot
@@ -384,7 +386,8 @@ class InteractiveConfigView(View):
         self.message: Optional[discord.Message] = None
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        """Ensure only the command author can interact."""
+        """
+Ensure only the command author can interact."""
         if interaction.user != self.author:
             try:
                 if not interaction.response.is_done():
@@ -399,7 +402,8 @@ class InteractiveConfigView(View):
 
     @discord.ui.button(label="Change Channels", style=discord.ButtonStyle.primary)
     async def change_channels(self, interaction: discord.Interaction, button: Button):
-        """Open channel configuration menu."""
+        """
+Open channel configuration menu."""
         view = ChannelConfigView(self.bot, self.author, self.config)
         from utils.cv2 import CV2
         from discord.ui import ActionRow
@@ -418,7 +422,8 @@ class InteractiveConfigView(View):
 
     @discord.ui.button(label="Toggle Categories", style=discord.ButtonStyle.secondary)
     async def toggle_categories(self, interaction: discord.Interaction, button: Button):
-        """Open category toggle menu."""
+        """
+Open category toggle menu."""
         view = CategoryToggleView(self.bot, self.author, self.config)
         from utils.cv2 import CV2
         from discord.ui import ActionRow
@@ -437,7 +442,8 @@ class InteractiveConfigView(View):
 
     @discord.ui.button(label="Manage Ignores", style=discord.ButtonStyle.secondary)
     async def manage_ignores(self, interaction: discord.Interaction, button: Button):
-        """Open ignore management menu."""
+        """
+Open ignore management menu."""
         view = IgnoreManagementView(self.bot, self.author, self.config)
         from utils.cv2 import CV2
         from discord.ui import ActionRow
@@ -460,7 +466,8 @@ class InteractiveConfigView(View):
     async def auto_delete_settings(
         self, interaction: discord.Interaction, button: Button
     ):
-        """Configure auto-delete duration."""
+        """
+Configure auto-delete duration."""
         view = AutoDeleteView(self.bot, self.author, self.config)
         current_duration = self.config.get("auto_delete_duration")
         current_text = {
@@ -487,8 +494,8 @@ class InteractiveConfigView(View):
 
 
 class ChannelConfigView(View):
-    """View for configuring log channels."""
-
+    """
+View for configuring log channels."""
     def __init__(self, bot: commands.Bot, author: discord.Member, config: Dict):
         super().__init__(timeout=300)
         self.bot = bot
@@ -497,7 +504,8 @@ class ChannelConfigView(View):
         self.add_item(self.create_category_select())
 
     def create_category_select(self) -> Select:
-        """Create select menu for category selection."""
+        """
+Create select menu for category selection."""
         options = []
         log_channels = self.config.get("log_channels", {})
 
@@ -519,7 +527,8 @@ class ChannelConfigView(View):
         return select
 
     async def category_select_callback(self, interaction: discord.Interaction):
-        """Handle category selection."""
+        """
+Handle category selection."""
         category = interaction.data["values"][0]
         view = ChannelSelectView(self.bot, self.author, category, None, self.config)
 
@@ -540,8 +549,8 @@ class ChannelConfigView(View):
 
 
 class CategoryToggleView(View):
-    """View for toggling categories."""
-
+    """
+View for toggling categories."""
     def __init__(self, bot: commands.Bot, author: discord.Member, config: Dict):
         super().__init__(timeout=300)
         self.bot = bot
@@ -550,7 +559,8 @@ class CategoryToggleView(View):
         self.add_item(self.create_toggle_select())
 
     def create_toggle_select(self) -> Select:
-        """Create select menu for toggling categories."""
+        """
+Create select menu for toggling categories."""
         options = []
         log_enabled = self.config.get("log_enabled", {})
 
@@ -571,7 +581,8 @@ class CategoryToggleView(View):
         return select
 
     async def toggle_callback(self, interaction: discord.Interaction):
-        """Handle category toggle."""
+        """
+Handle category toggle."""
         category = interaction.data["values"][0]
         log_enabled = self.config.get("log_enabled", {})
         current_state = log_enabled.get(category, False)
@@ -611,8 +622,8 @@ class CategoryToggleView(View):
 
 
 class IgnoreManagementView(View):
-    """View for managing ignore lists."""
-
+    """
+View for managing ignore lists."""
     def __init__(self, bot: commands.Bot, author: discord.Member, config: Dict):
         super().__init__(timeout=300)
         self.bot = bot
@@ -621,7 +632,8 @@ class IgnoreManagementView(View):
 
     @discord.ui.button(label="View Ignored", style=discord.ButtonStyle.secondary)
     async def view_ignored(self, interaction: discord.Interaction, button: Button):
-        """Show current ignore lists."""
+        """
+Show current ignore lists."""
         ignore_channels = self.config.get("ignore_channels", [])
         ignore_roles = self.config.get("ignore_roles", [])
         ignore_users = self.config.get("ignore_users", [])
@@ -676,7 +688,8 @@ class IgnoreManagementView(View):
 
     @discord.ui.button(label="Manage Channels", style=discord.ButtonStyle.primary)
     async def manage_channels(self, interaction: discord.Interaction, button: Button):
-        """Manage ignored channels."""
+        """
+Manage ignored channels."""
         from utils.cv2 import CV2
         from discord.ui import ActionRow
 
@@ -694,7 +707,8 @@ class IgnoreManagementView(View):
 
     @discord.ui.button(label="Manage Roles", style=discord.ButtonStyle.primary)
     async def manage_roles(self, interaction: discord.Interaction, button: Button):
-        """Manage ignored roles."""
+        """
+Manage ignored roles."""
         from utils.cv2 import CV2
         from discord.ui import ActionRow
 
@@ -712,7 +726,8 @@ class IgnoreManagementView(View):
 
     @discord.ui.button(label="Manage Users", style=discord.ButtonStyle.primary)
     async def manage_users(self, interaction: discord.Interaction, button: Button):
-        """Manage ignored users."""
+        """
+Manage ignored users."""
         from utils.cv2 import CV2
         from discord.ui import ActionRow
 
@@ -730,8 +745,8 @@ class IgnoreManagementView(View):
 
 
 class AutoDeleteView(View):
-    """View for configuring auto-delete duration."""
-
+    """
+View for configuring auto-delete duration."""
     def __init__(self, bot: commands.Bot, author: discord.Member, config: Dict):
         super().__init__(timeout=300)
         self.bot = bot
@@ -740,7 +755,8 @@ class AutoDeleteView(View):
         self.add_item(self.create_duration_select())
 
     def create_duration_select(self) -> Select:
-        """Create select menu for auto-delete duration."""
+        """
+Create select menu for auto-delete duration."""
         options = [
             discord.SelectOption(
                 label="Disabled", value="None", description="Never auto-delete logs"
@@ -763,7 +779,8 @@ class AutoDeleteView(View):
         return select
 
     async def duration_callback(self, interaction: discord.Interaction):
-        """Handle duration selection."""
+        """
+Handle duration selection."""
         duration_str = interaction.data["values"][0]
         duration = None if duration_str == "None" else int(duration_str)
 
@@ -804,8 +821,8 @@ class AutoDeleteView(View):
 
 
 class ChannelSelectView(View):
-    """View for selecting channels for specific categories with pagination."""
-
+    """
+View for selecting channels for specific categories with pagination."""
     def __init__(
         self,
         bot: commands.Bot,
@@ -839,7 +856,8 @@ class ChannelSelectView(View):
             self.add_navigation_buttons()
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        """Ensure only the command author can interact."""
+        """
+Ensure only the command author can interact."""
         if interaction.user != self.author:
             try:
                 if not interaction.response.is_done():
@@ -853,7 +871,8 @@ class ChannelSelectView(View):
         return True
 
     def create_channel_select(self) -> Select:
-        """Create select menu for channel selection with pagination."""
+        """
+Create select menu for channel selection with pagination."""
         start_idx = self.current_page * self.channels_per_page
         end_idx = start_idx + self.channels_per_page
         current_channels = self.all_channels[start_idx:end_idx]
@@ -886,7 +905,8 @@ class ChannelSelectView(View):
         return select
 
     def add_navigation_buttons(self):
-        """Add navigation buttons for pagination."""
+        """
+Add navigation buttons for pagination."""
         if self.total_pages > 1:
             prev_button = Button(
                 label="◀ Previous",
@@ -907,19 +927,22 @@ class ChannelSelectView(View):
             self.add_item(next_button)
 
     async def previous_page(self, interaction: discord.Interaction):
-        """Go to previous page."""
+        """
+Go to previous page."""
         if self.current_page > 0:
             self.current_page -= 1
             await self.update_view(interaction)
 
     async def next_page(self, interaction: discord.Interaction):
-        """Go to next page."""
+        """
+Go to next page."""
         if self.current_page < self.total_pages - 1:
             self.current_page += 1
             await self.update_view(interaction)
 
     async def update_view(self, interaction: discord.Interaction):
-        """Update the view with new page content."""
+        """
+Update the view with new page content."""
         self.clear_items()
         self.add_item(self.create_channel_select())
         if self.total_pages > 1:
@@ -941,7 +964,8 @@ class ChannelSelectView(View):
         await interaction.response.edit_message(embed=None, view=layout_view)
 
     async def channel_select_callback(self, interaction: discord.Interaction):
-        """Handle channel selection."""
+        """
+Handle channel selection."""
         try:
             select = [item for item in self.children if isinstance(item, Select)][0]
 
@@ -1047,7 +1071,8 @@ class ChannelSelectView(View):
 
     @discord.ui.button(label="Back to Setup", style=discord.ButtonStyle.secondary)
     async def back_button(self, interaction: discord.Interaction, button: Button):
-        """Return to main setup view."""
+        """
+Return to main setup view."""
         if self.config:
             config_view = InteractiveConfigView(self.bot, self.author, self.config)
             from utils.cv2 import CV2
@@ -1068,7 +1093,8 @@ class ChannelSelectView(View):
             await self.return_to_setup(interaction)
 
     async def return_to_setup(self, interaction: discord.Interaction):
-        """Return to the main setup view."""
+        """
+Return to the main setup view."""
         try:
             embed = CV2EmbedAdapter(
                 "Logging Setup",
@@ -1121,8 +1147,8 @@ class ChannelSelectView(View):
 
 
 class Logging(commands.Cog):
-    """Comprehensive logging cog with modern UI and expanded event coverage."""
-
+    """
+Comprehensive logging cog with modern UI and expanded event coverage."""
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.config_cache: Dict[int, Dict[str, Any]] = {}
@@ -1135,7 +1161,8 @@ class Logging(commands.Cog):
         asyncio.create_task(self._periodic_cache_cleanup())
 
     async def _periodic_cache_cleanup(self):
-        """Periodically clean up audit cache to prevent memory leaks."""
+        """
+Periodically clean up audit cache to prevent memory leaks."""
         while True:
             try:
                 await asyncio.sleep(AUDIT_CACHE_TTL)
@@ -1167,7 +1194,8 @@ class Logging(commands.Cog):
                 logger.error(f"Error in cache cleanup: {e}")
 
     async def _load_config(self):
-        """Load configuration from JSON file with error handling."""
+        """
+Load configuration from JSON file with error handling."""
         try:
             if os.path.exists(CONFIG_FILE):
                 try:
@@ -1201,7 +1229,8 @@ class Logging(commands.Cog):
             self.config_cache = {}
 
     async def _save_config(self):
-        """Save configuration to JSON file with atomic writes and error handling."""
+        """
+Save configuration to JSON file with atomic writes and error handling."""
         async with self.config_lock:
             try:
                 data = {
@@ -1227,7 +1256,8 @@ class Logging(commands.Cog):
                 raise
 
     async def _save_log_entry(self, guild_id: int, category: str, log_data: Dict):
-        """Save individual log entries to JSON files with size limits and error handling."""
+        """
+Save individual log entries to JSON files with size limits and error handling."""
         try:
             date_str = datetime.utcnow().strftime("%Y-%m-%d")
             log_file = Path(LOGS_DIR) / f"{guild_id}_{category}_{date_str}.json"
@@ -1293,7 +1323,8 @@ class Logging(commands.Cog):
         ignore_users: List[int],
         auto_delete_duration: Optional[int],
     ):
-        """Save logging configuration with validation and error handling."""
+        """
+Save logging configuration with validation and error handling."""
         try:
             if not isinstance(guild_id, int) or guild_id <= 0:
                 raise ValueError(f"Invalid guild_id: {guild_id}")
@@ -1353,7 +1384,8 @@ class Logging(commands.Cog):
             raise
 
     async def _get_log_config(self, guild_id: int) -> Optional[Dict]:
-        """Retrieve logging configuration from cache with validation."""
+        """
+Retrieve logging configuration from cache with validation."""
         try:
             config = self.config_cache.get(guild_id)
             if config and isinstance(config, dict):
@@ -1369,7 +1401,8 @@ class Logging(commands.Cog):
         action: discord.AuditLogAction,
         target_id: Optional[int] = None,
     ) -> Optional[discord.AuditLogEntry]:
-        """Fetch audit log entry with caching and proper error handling."""
+        """
+Fetch audit log entry with caching and proper error handling."""
         if not guild.me.guild_permissions.view_audit_log:
             return None
 
@@ -1401,7 +1434,8 @@ class Logging(commands.Cog):
         channel_id: Optional[int] = None,
         author_id: Optional[int] = None,
     ):
-        """Send log embed with comprehensive filtering and error handling."""
+        """
+Send log embed with comprehensive filtering and error handling."""
         try:
             config = await self._get_log_config(guild.id)
             if not config or not config.get("log_enabled", {}).get(category, False):
@@ -1481,7 +1515,8 @@ class Logging(commands.Cog):
     def _create_modern_embed(
         self, title: str, description: str = None, color: int = 0xFF0000
     ):
-        """Create a modern CV2 container representation that supports Embed methods."""
+        """
+Create a modern CV2 container representation that supports Embed methods."""
         embed = CV2EmbedAdapter(title, description)
         embed.color = color
         return embed
@@ -1489,7 +1524,8 @@ class Logging(commands.Cog):
     def _create_status_embeds(
         self, guild: discord.Guild, config: Dict
     ) -> List[discord.Embed]:
-        """Create comprehensive status embeds with minimal styling."""
+        """
+Create comprehensive status embeds with minimal styling."""
         embeds = []
 
         main_embed = self._create_modern_embed(
@@ -1600,8 +1636,8 @@ class Logging(commands.Cog):
 
     @commands.hybrid_group(invoke_without_command=True, name="log")
     async def log(self, ctx: commands.Context):
-        """Main logging command group. Works with both slash (/) and prefix (!) commands."""
-
+        """
+Main logging command group. Works with both slash (/) and prefix (!) commands."""
         await ctx.send_help(ctx.command)
 
     @log.command(
@@ -1611,7 +1647,8 @@ class Logging(commands.Cog):
     @commands.cooldown(1, 30, commands.BucketType.guild)
     @commands.max_concurrency(1, per=commands.BucketType.guild, wait=False)
     async def log_setup(self, ctx: commands.Context):
-        """Enhanced interactive setup with improved user experience."""
+        """
+Enhanced interactive setup with improved user experience."""
         try:
             config = await self._get_log_config(ctx.guild.id)
             if config:
@@ -1634,7 +1671,8 @@ class Logging(commands.Cog):
     @log.command(name="status", description="View the current logging configuration.")
     @commands.has_permissions(manage_guild=True)
     async def log_status(self, ctx: commands.Context):
-        """Display comprehensive logging status."""
+        """
+Display comprehensive logging status."""
         try:
             config = await self._get_log_config(ctx.guild.id)
             if not config:
@@ -1669,7 +1707,8 @@ class Logging(commands.Cog):
         category: Optional[str] = None,
         hours: Optional[int] = 24,
     ):
-        """Search through logs with comprehensive filtering options."""
+        """
+Search through logs with comprehensive filtering options."""
         try:
             if hours and (hours < 1 or hours > 168):
                 embed = self._create_modern_embed(
@@ -1824,7 +1863,8 @@ class Logging(commands.Cog):
     @log.command(name="reset", description="Reset all logging configuration.")
     @commands.has_permissions(manage_guild=True)
     async def log_reset(self, ctx: commands.Context):
-        """Reset logging configuration for the guild."""
+        """
+Reset logging configuration for the guild."""
         try:
             if ctx.guild.id in self.config_cache:
                 del self.config_cache[ctx.guild.id]
@@ -1855,7 +1895,8 @@ class Logging(commands.Cog):
     )
     @commands.has_permissions(manage_guild=True)
     async def log_toggle(self, ctx: commands.Context, category: str, enabled: bool):
-        """Toggle logging categories on/off."""
+        """
+Toggle logging categories on/off."""
         try:
             if category not in LOG_CATEGORIES:
                 embed = self._create_modern_embed(
@@ -1908,7 +1949,8 @@ class Logging(commands.Cog):
     )
     @commands.has_permissions(manage_guild=True)
     async def log_config(self, ctx: commands.Context):
-        """Fully interactive configuration menu."""
+        """
+Fully interactive configuration menu."""
         try:
             config = await self._get_log_config(ctx.guild.id)
             if not config:
@@ -1961,7 +2003,8 @@ class Logging(commands.Cog):
         target_type: str = None,
         target: str = None,
     ):
-        """Manage ignore lists."""
+        """
+Manage ignore lists."""
         try:
             if action not in ["add", "remove", "list", "clear"]:
                 embed = self._create_modern_embed(
@@ -2168,7 +2211,8 @@ class Logging(commands.Cog):
     )
     @commands.has_permissions(manage_guild=True)
     async def log_test(self, ctx: commands.Context, category: str = None):
-        """Send test log messages."""
+        """
+Send test log messages."""
         try:
             config = await self._get_log_config(ctx.guild.id)
             if not config:
@@ -2241,7 +2285,8 @@ class Logging(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(1, 300, commands.BucketType.guild)
     async def log_export(self, ctx: commands.Context, days: int = 7):
-        """Export log data for the specified number of days."""
+        """
+Export log data for the specified number of days."""
         try:
             if days < 1 or days > 30:
                 embed = self._create_modern_embed(
@@ -2346,7 +2391,8 @@ class Logging(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_edit(self, before: discord.Message, after: discord.Message):
-        """Enhanced message edit logging with content comparison."""
+        """
+Enhanced message edit logging with content comparison."""
         try:
             if not before.guild or before.author.bot or before.content == after.content:
                 return
@@ -2387,7 +2433,8 @@ class Logging(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
-        """Enhanced message deletion logging with attachment info."""
+        """
+Enhanced message deletion logging with attachment info."""
         try:
             if not message.guild or message.author.bot:
                 return
@@ -2425,7 +2472,8 @@ class Logging(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
-        """Log member joins with comprehensive information."""
+        """
+Log member joins with comprehensive information."""
         try:
             embed = self._create_modern_embed("Member Joined")
             embed.set_author(
@@ -2453,7 +2501,8 @@ class Logging(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
-        """Log member leaves with role information."""
+        """
+Log member leaves with role information."""
         try:
             embed = self._create_modern_embed("Member Left")
             embed.set_author(
@@ -2489,7 +2538,8 @@ class Logging(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(self, before: discord.Member, after: discord.Member):
-        """Log member updates including role changes."""
+        """
+Log member updates including role changes."""
         try:
             if before.roles != after.roles:
                 embed = self._create_modern_embed("Member Roles Updated")
@@ -2544,7 +2594,8 @@ class Logging(commands.Cog):
     async def on_member_ban(
         self, guild: discord.Guild, user: Union[discord.User, discord.Member]
     ):
-        """Log member bans with audit log information."""
+        """
+Log member bans with audit log information."""
         try:
             embed = self._create_modern_embed("Member Banned")
             embed.set_author(name=user.display_name, icon_url=user.display_avatar.url)
@@ -2572,7 +2623,8 @@ class Logging(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_unban(self, guild: discord.Guild, user: discord.User):
-        """Log member unbans."""
+        """
+Log member unbans."""
         try:
             embed = self._create_modern_embed("Member Unbanned")
             embed.set_author(name=user.display_name, icon_url=user.display_avatar.url)
@@ -2605,7 +2657,8 @@ class Logging(commands.Cog):
         before: discord.VoiceState,
         after: discord.VoiceState,
     ):
-        """Log voice state changes."""
+        """
+Log voice state changes."""
         try:
             if before.channel == after.channel:
                 return
@@ -2640,7 +2693,8 @@ class Logging(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel):
-        """Log channel creation."""
+        """
+Log channel creation."""
         try:
             embed = self._create_modern_embed("Channel Created")
 
@@ -2668,7 +2722,8 @@ class Logging(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
-        """Log channel deletion."""
+        """
+Log channel deletion."""
         try:
             embed = self._create_modern_embed("Channel Deleted")
 
@@ -2696,7 +2751,8 @@ class Logging(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_update(self, before, after):
-        """Log channel updates."""
+        """
+Log channel updates."""
         try:
             changes = []
 
@@ -2736,7 +2792,8 @@ class Logging(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_create(self, role):
-        """Log role creation."""
+        """
+Log role creation."""
         try:
             embed = self._create_modern_embed("Role Created")
 
@@ -2764,7 +2821,8 @@ class Logging(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role):
-        """Log role deletion."""
+        """
+Log role deletion."""
         try:
             embed = self._create_modern_embed("Role Deleted")
 
@@ -2788,7 +2846,8 @@ class Logging(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_update(self, before, after):
-        """Log role updates."""
+        """
+Log role updates."""
         try:
             changes = []
 
@@ -2829,7 +2888,8 @@ class Logging(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_update(self, before, after):
-        """Log guild/server updates."""
+        """
+Log guild/server updates."""
         try:
             changes = []
 
@@ -2866,7 +2926,8 @@ class Logging(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_emojis_update(self, guild, before, after):
-        """Log emoji updates."""
+        """
+Log emoji updates."""
         try:
             added_emojis = set(after) - set(before)
             removed_emojis = set(before) - set(after)
@@ -2925,7 +2986,8 @@ class Logging(commands.Cog):
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
-        """Log reaction additions (optional)."""
+        """
+Log reaction additions (optional)."""
         try:
             if not reaction.message.guild or user.bot:
                 return
@@ -2960,7 +3022,8 @@ class Logging(commands.Cog):
 
     @commands.Cog.listener()
     async def on_reaction_remove(self, reaction, user):
-        """Log reaction removals (optional)."""
+        """
+Log reaction removals (optional)."""
         try:
             if not reaction.message.guild or user.bot:
                 return
@@ -2995,5 +3058,6 @@ class Logging(commands.Cog):
 
 
 async def setup(bot):
-    """Setup function for the cog."""
+    """
+Setup function for the cog."""
     await bot.add_cog(Logging(bot))

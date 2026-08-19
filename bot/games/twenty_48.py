@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -75,7 +72,6 @@ class Twenty48:
     """
     Twenty48 Game
     """
-
     player: discord.User
 
     def __init__(
@@ -213,7 +209,6 @@ class Twenty48:
     def number_to_emoji(self) -> str:
         board = self.board
         game_string = ""
-
         emoji_array = [
             [self._conversion.get(str(l), f"`{l}` ") for l in row] for row in board
         ]

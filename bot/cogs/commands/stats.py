@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -18,7 +15,7 @@ import psutil
 import sys
 import os
 import time
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import datetime
 from discord.ui import LayoutView, TextDisplay, Separator, Container, ActionRow, Select
 from discord.ext import commands
@@ -76,8 +73,7 @@ def create_stats_content(stats_data, selected):
         "Team Info": (
             "There is only one person who made me. Thanks to him ❤️.\n\n"
             f"**{ZYROX_OWNER} Main Owner**\n"
-            "[01]. [runxking](https://discord.com/users/767979794411028491)\n"
-            "[02]. [Ray](https://discord.com/users/870179991462236170)"
+            "[01]. [Avinash aka shroud.bean](https://discord.com/users/879207512073732106)"
         ),
         "Code Info": (
             f"**{ZYROX_SEARCH} Codebase Overview**\n\n"
@@ -216,6 +212,7 @@ class Stats(commands.Cog):
     @ignore_check()
     @commands.cooldown(1, 7, commands.BucketType.user)
     async def stats(self, ctx):
+        """Executes the stats command."""
         loading_view = StatsLoadingView()
         loading_msg = await ctx.reply(view=loading_view)
 

@@ -4,28 +4,25 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
 import aiohttp
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import asyncio
 import logging
 from discord.ext import commands
-from core import zyrox, Cog
+from core import shikshabot, Cog
 from utils.config import *
 
 DATABASE_PATH = 'db/autorole.db'
 logger = logging.getLogger(__name__)
 
 class Autorole2(Cog):
-    def __init__(self, bot: zyrox):
+    def __init__(self, bot: shikshabot):
         self.bot = bot
         self.headers = {"Authorization": f"Bot {self.bot.http.token}"}
 
@@ -43,6 +40,7 @@ class Autorole2(Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
+        """Executes the on member join command."""
         data = await self.get_autorole(member.guild.id)
         bot_roles = data["bots"]
         human_roles = data["humans"]

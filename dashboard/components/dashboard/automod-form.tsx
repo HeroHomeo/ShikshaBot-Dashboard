@@ -5,12 +5,9 @@
  * ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
  * ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
  * ║                                                                  ║
- * ║           © 2026 CodeX Devs — All Rights Reserved               ║
+ * ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
  * ║                                                                  ║
- * ║   discord  ──  https://discord.gg/codexdev                      ║
- * ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
- * ║   github   ──  https://github.com/RayExo                        ║
- * ║                                                                  ║
+    * ║                                                                  ║
  * ╚══════════════════════════════════════════════════════════════════╝
  */
 
@@ -60,6 +57,8 @@ interface AutomodFormProps {
 export function AutomodForm({ initialConfig, guildId }: AutomodFormProps) {
   const [config, setConfig] = useState<AutomodConfig>(initialConfig);
   const [saving, setSaving] = useState(false);
+  const [newWord, setNewWord] = useState("");
+  const [blacklistWords, setBlacklistWords] = useState<string[]>(initialConfig.blacklist_words || []);
 
   const handleToggle = (key: string) => {
     setConfig({
@@ -80,6 +79,7 @@ export function AutomodForm({ initialConfig, guildId }: AutomodFormProps) {
     const promise = api.updateAutomod(guildId, {
       enabled: config.enabled,
       punishments: config.punishments,
+      blacklist_words: blacklistWords,
     });
 
     toast.promise(promise, {
@@ -166,6 +166,70 @@ export function AutomodForm({ initialConfig, guildId }: AutomodFormProps) {
                   </div>
                 );
               })}
+            </div>
+
+            <div className="mt-8 pt-8 border-t border-slate-800/60 space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <ShieldAlert className="h-5 w-5 text-red-500" />
+                <h3 className="font-bold text-white">Blacklisted Words (Profanity Filter)</h3>
+              </div>
+              <p className="text-sm text-slate-400">
+                Any message containing these words will be automatically deleted.
+              </p>
+              
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newWord}
+                  onChange={(e) => setNewWord(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      if (newWord.trim() && !blacklistWords.includes(newWord.trim().toLowerCase())) {
+                        setBlacklistWords([...blacklistWords, newWord.trim().toLowerCase()]);
+                        setNewWord("");
+                      }
+                    }
+                  }}
+                  placeholder="Enter a word to block..."
+                  className="flex h-10 w-full rounded-md border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-slate-950"
+                />
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (newWord.trim() && !blacklistWords.includes(newWord.trim().toLowerCase())) {
+                      setBlacklistWords([...blacklistWords, newWord.trim().toLowerCase()]);
+                      setNewWord("");
+                    }
+                  }}
+                  type="button"
+                >
+                  Add
+                </Button>
+              </div>
+
+              {blacklistWords.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-4 p-4 bg-slate-900/50 rounded-xl border border-slate-800">
+                  {blacklistWords.map((word) => (
+                    <span 
+                      key={word} 
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 text-red-500 text-sm border border-red-500/20"
+                    >
+                      {word}
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setBlacklistWords(blacklistWords.filter((w) => w !== word));
+                        }}
+                        className="hover:text-red-400 transition-colors"
+                        type="button"
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <Button 

@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -22,7 +19,7 @@ from discord.ui import Button, View, LayoutView, TextDisplay, Separator, Contain
 import wavelink
 from wavelink.enums import TrackSource
 from utils import Paginator, DescriptionEmbedPaginator
-from core import Cog, zyrox, Context
+from core import Cog, shikshabot, Context
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 import io
 import aiohttp
@@ -309,14 +306,20 @@ class MusicControlView(LayoutView):
             await interaction.response.send_message("No track is currently playing.", ephemeral=True)
 
     async def _cb_stop(self, interaction):
+        await interaction.response.defer()
         if self.player:
-            voice_channel = self.player.channel
+            voice_channel = getattr(self.player, 'channel', None)
             if voice_channel:
                 await voice_channel.edit(status=None)
+                
+            cog = self.ctx.bot.get_cog("Music")
+            if cog and self.player.current:
+                await cog.mark_played(self.player, self.player.current)
+                
             await self.player.disconnect()
-            await interaction.response.send_message(f"Stopped and disconnected by **{interaction.user.display_name}**.")
+            await interaction.followup.send(f"Stopped and disconnected by **{interaction.user.display_name}**.")
         else:
-            await interaction.response.send_message("Not connected.", ephemeral=True)
+            await interaction.followup.send("Not connected.", ephemeral=True)
 
     async def _cb_forward(self, interaction):
         if self.player.playing:
@@ -335,7 +338,7 @@ class MusicControlView(LayoutView):
 
 
 class Music(commands.Cog):
-    def __init__(self, client: zyrox):
+    def __init__(self, client: shikshabot):
         self.client = client
         self.client.loop.create_task(self.connect_nodes())
         self.client.loop.create_task(self.monitor_inactivity())
@@ -374,15 +377,23 @@ class Music(commands.Cog):
             if player:
                 await player.disconnect(force=True)
                 try:
-                    support = Button(label='Support', style=discord.ButtonStyle.link, url='https://discord.gg/codexdev')
-                    vote = Button(label='Vote', style=discord.ButtonStyle.link, url='https://top.gg/bot//vote')
+                    async def support_callback(interaction: discord.Interaction):
+                        await interaction.response.send_message(
+                            "If you really want to support me, then send some real dough! 💸",
+                            file=discord.File('assets/qr_code.png'),
+                            ephemeral=True
+                        )
+
+                    support = Button(label='Support', style=discord.ButtonStyle.success)
+                    support.callback = support_callback
+                    
                     view = LayoutView(timeout=None)
                     container = build_container(
                         TextDisplay("**Inactive Timeout**"),
                         Separator(visible=True),
                         TextDisplay("Bot has been disconnected due to inactivity (being idle in Voice Channel) for more than 2 minutes."),
                         Separator(visible=True),
-                        ActionRow(support, vote),
+                        ActionRow(support),
                         Separator(visible=True),
                         TextDisplay(f"*Thanks for choosing {BRAND_NAME}!*"),
                     )
@@ -392,26 +403,107 @@ class Music(commands.Cog):
                     pass
 
     async def connect_nodes(self) -> None:
-        host = os.getenv("LAVALINK_HOST", "lava-v4.ajieblogs.eu.org")
-        password = os.getenv("LAVALINK_PASSWORD", "https://dsc.gg/ajidevserver")
+        import aiohttp
+        host = os.getenv("LAVALINK_HOST", "").strip()
+        password = os.getenv("LAVALINK_PASSWORD", "").strip()
         secure = os.getenv("LAVALINK_SECURE", "true").strip().lower() == "true"
         port = os.getenv("LAVALINK_PORT", "").strip()
 
-        if secure:
-            uri = f"https://{host}"
-        else:
-            uri = f"http://{host}:{port}" if port else f"http://{host}"
+        nodes = []
 
-        nodes = [wavelink.Node(uri=uri, password=password)]
+        # If no host is explicitly set, dynamically fetch active nodes
+        if not host:
+            try:
+                # Add a browser User-Agent header to bypass Cloudflare rate limits on Render's shared IPs
+                headers = {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                }
+                async with aiohttp.ClientSession(headers=headers) as session:
+                    async with session.get("https://lavalink-list.ajieblogs.eu.org/All", timeout=5) as res:
+                        if res.status == 200:
+                            data = await res.json()
+                            for node in data:
+                                if node.get("version", "").startswith("v4") or node.get("version", "").startswith("4"):
+                                    n_host = node.get("host")
+                                    n_port = str(node.get("port", ""))
+                                    n_pwd = node.get("password")
+                                    n_sec = node.get("secure", False)
+                                    n_uri = f"https://{n_host}:{n_port}" if n_sec else f"http://{n_host}:{n_port}"
+                                    nodes.append(wavelink.Node(uri=n_uri, password=n_pwd))
+                                    print(f"[Music] Discovered active Lavalink v4 node: {n_host}:{n_port}")
+                                    if len(nodes) >= 3:
+                                        break
+            except Exception as e:
+                print(f"[Music] Error dynamically fetching active Lavalink nodes: {e}")
+
+        # If we couldn't get any nodes dynamically, use the static fallbacks
+        if not host and not nodes:
+            fallbacks = [
+                {"host": "lavalinkv4.serenetia.com", "port": "80", "password": "https://seretia.link/discord", "secure": False},
+                {"host": "lava.g3v.co.uk", "port": "9008", "password": "lavalinklol", "secure": False},
+                {"host": "lavalink.jirayu.net", "port": "13592", "password": "youshallnotpass", "secure": False},
+            ]
+            for f in fallbacks:
+                f_uri = f"https://{f['host']}:{f['port']}" if f["secure"] else f"http://{f['host']}:{f['port']}"
+                nodes.append(wavelink.Node(uri=f_uri, password=f["password"]))
+                print(f"[Music] Loaded static fallback Lavalink node: {f['host']}:{f['port']}")
+
+        # If the user has explicitly defined a custom host, use only that host
+        if host:
+            if secure:
+                uri = f"https://{host}:{port}" if port else f"https://{host}"
+            else:
+                uri = f"http://{host}:{port}" if port else f"http://{host}"
+            nodes = [wavelink.Node(uri=uri, password=password)]
+            print(f"[Music] Loaded custom user Lavalink node: {host}")
+
+        print(f"[Music] Connecting wavelink pool with {len(nodes)} node(s)...")
         await wavelink.Pool.connect(nodes=nodes, client=self.client, cache_capacity=None)
 
 
     async def display_player_embed(self, player, track, ctx, autoplay=False):
-        await ctx.send(view=MusicControlView(player, ctx, track, autoplay))
+        view = MusicControlView(player, ctx, track, autoplay)
+        msg = await ctx.send(view=view)
+        player.current_ui_message = msg
+        player.current_ui_autoplay = autoplay
 
+    async def mark_played(self, player, track, autoplay=False):
+        if hasattr(player, 'current_ui_message') and player.current_ui_message:
+            try:
+                from utils.cv2 import LayoutView, build_container
+                from discord.ui import Section, Thumbnail, TextDisplay
+                items = []
+                sec = track.length // 1000
+                duration = f"{sec // 60:02d}:{sec % 60:02d}"
+                requester = player.ctx.author.display_name
+                if autoplay: requester += " (Autoplay)"
+
+                title_text = f"**Played [{track.title}]({track.uri})**"
+                items.append(TextDisplay(title_text))
+
+                bullet_text = (
+                    f"• **Author:** `{track.author}`\n"
+                    f"• **Duration:** `{duration}`\n"
+                    f"• **Requester:** {requester}"
+                )
+
+                if getattr(track, 'artwork', None):
+                    accessory = Thumbnail(media=track.artwork)
+                    items.append(Section(TextDisplay(bullet_text), accessory=accessory))
+                else:
+                    items.append(TextDisplay(bullet_text))
+
+                view = LayoutView(timeout=None)
+                container = build_container(*items)
+                view.add_item(container)
+                await player.current_ui_message.edit(view=view)
+            except Exception as e:
+                logger.error(f"Error in mark_played: {e}")
 
     async def on_track_end(self, payload: wavelink.TrackEndEventPayload):
         player = payload.player
+        await self.mark_played(player, payload.track, getattr(player, 'current_ui_autoplay', False))
+        
         if not player.queue:
             if player.queue.mode == wavelink.QueueMode.loop:
                 await player.play(payload.track)
@@ -423,15 +515,24 @@ class Music(commands.Cog):
                     await player.ctx.send(view=CV2("No suitable track found for autoplay."))
             else:
                 await player.disconnect()
-                support = Button(label='Support', style=discord.ButtonStyle.link, url='https://discord.gg/codexdev')
-                vote = Button(label='Vote', style=discord.ButtonStyle.link, url='https://top.gg/bot//vote')
+                
+                async def support_callback(interaction: discord.Interaction):
+                    await interaction.response.send_message(
+                        "If you really want to support me, then send some real dough! 💸",
+                        file=discord.File('assets/qr_code.png'),
+                        ephemeral=True
+                    )
+
+                support = Button(label='Support', style=discord.ButtonStyle.success)
+                support.callback = support_callback
+                
                 view = LayoutView(timeout=None)
                 container = build_container(
                     TextDisplay("**Queue Ended**"),
                     Separator(visible=True),
                     TextDisplay("All tracks have been played, leaving the voice channel."),
                     Separator(visible=True),
-                    ActionRow(support, vote),
+                    ActionRow(support),
                 )
                 view.add_item(container)
                 await player.ctx.send(view=view)
@@ -457,7 +558,8 @@ class Music(commands.Cog):
                 return
         vc.autoplay = wavelink.AutoPlayMode.disabled
 
-        """if re.match(SPOTIFY_TRACK_REGEX, query):
+        """
+if re.match(SPOTIFY_TRACK_REGEX, query):
             await self.handle_spotify_link(ctx, vc, query, "track")
         elif re.match(SPOTIFY_PLAYLIST_REGEX, query):
             await self.handle_spotify_link(ctx, vc, query, "playlist")
@@ -466,14 +568,14 @@ class Music(commands.Cog):
         
             return"""
             
-        tracks = await wavelink.Playable.search(query)
+        tracks = await wavelink.Playable.search(query, source=wavelink.enums.TrackSource.SoundCloud)
         if not tracks:
             await ctx.send(view=CV2("No results found."))
             return
 
         if isinstance(tracks, wavelink.Playlist):
             await vc.queue.put_wait(tracks.tracks)
-            await ctx.send(view=CV2(f"{ZPLUS} Added playlist [{tracks.name}](https://discord.gg/codexdev) with **{len(tracks.tracks)} songs** to the queue."))
+            await ctx.send(view=CV2(f"{ZPLUS} Added playlist **{tracks.name}** with **{len(tracks.tracks)} songs** to the queue."))
             if not vc.playing:
                 track = await vc.queue.get_wait()
                 await vc.play(track)
@@ -481,7 +583,7 @@ class Music(commands.Cog):
         else:
             track = tracks[0]
             await vc.queue.put_wait(track)
-            await ctx.send(view=CV2(f"{ZPLUS}   Added [{track.title}](https://discord.gg/codexdev) to the queue."))
+            await ctx.send(view=CV2(f"{ZPLUS} Added **[{track.title}]({track.uri})** to the queue."))
             if not vc.playing:
                 await vc.play(await vc.queue.get_wait())
                 await self.display_player_embed(vc, track, ctx)
@@ -502,7 +604,7 @@ class Music(commands.Cog):
 
                 
                 search_query = f"{title} by {author}"
-                search_results = await wavelink.Playable.search(search_query, source=wavelink.enums.TrackSource.YouTube)
+                search_results = await wavelink.Playable.search(search_query, source=wavelink.enums.TrackSource.SoundCloud)
 
                 if not search_results:
                     await ctx.send("Can't play this track from Spotify, please try with another track.")
@@ -510,7 +612,7 @@ class Music(commands.Cog):
 
                 track = search_results[0]
                 await vc.queue.put_wait(track)
-                await ctx.send(view=CV2(f"{ZPLUS}  Added [{track.title}](https://discord.gg/codexdev) to the queue."))
+                await ctx.send(view=CV2(f"{ZPLUS} Added **[{track.title}]({track.uri})** to the queue."))
                 if not vc.playing:
                     await vc.play(track)
                     await self.display_player_embed(vc, track, ctx)
@@ -535,13 +637,13 @@ class Music(commands.Cog):
                     author = ', '.join(artist['name'] for artist in track['track']['artists'])
                     search_query = f"{title} {author}"
 
-                    track_results = await wavelink.Playable.search(search_query, source=wavelink.enums.TrackSource.YouTube)
+                    track_results = await wavelink.Playable.search(search_query, source=wavelink.enums.TrackSource.SoundCloud)
                     if track_results:
                         await vc.queue.put_wait(track_results[0])
                         c += 1
                         await ctx.message.add_reaction("✅")
 
-                await ctx.send(view=CV2(f"{ZPLUS} Added **{c}** of **{playlist_length}** tracks from **playlist** **[{playlist_info['name']}](https://discord.gg/codexdev)** to the queue."))
+                await ctx.send(view=CV2(f"{ZPLUS} Added **{c}** of **{playlist_length}** tracks from playlist **{playlist_info['name']}** to the queue."))
                 await lmao.delete()
                 
                 if not vc.playing:
@@ -565,11 +667,11 @@ class Music(commands.Cog):
                     author = ', '.join(artist['name'] for artist in track['artists'])
                     search_query = f"{title} {author}"
 
-                    track_results = await wavelink.Playable.search(search_query, source=wavelink.enums.TrackSource.YouTube)
+                    track_results = await wavelink.Playable.search(search_query, source=wavelink.enums.TrackSource.SoundCloud)
                     if track_results:
                         await vc.queue.put_wait(track_results[0])
 
-                await ctx.send(view=CV2(f"{ZPLUS} Added all tracks from album **[{album_info['name']}](https://discord.gg/codexdev)** to the queue."))
+                await ctx.send(view=CV2(f"{ZPLUS} Added all tracks from album **{album_info['name']}** to the queue."))
                 if not vc.playing:
                     next_track = await vc.queue.get_wait()
                     await vc.play(next_track)
@@ -960,6 +1062,7 @@ class Music(commands.Cog):
 
     @commands.Cog.listener()
     async def on_wavelink_track_start(self, payload: wavelink.TrackStartEventPayload):
+        """Executes the on wavelink track start command."""
         player = payload.player
         track = player.current
         guild_id = player.guild.id
@@ -980,8 +1083,12 @@ class Music(commands.Cog):
 
     @commands.Cog.listener()
     async def on_wavelink_track_end(self, payload: wavelink.TrackEndEventPayload):
+        """Executes the on wavelink track end command."""
         player = payload.player
-        voice_channel = player.channel
+        if not player:
+            return
+            
+        voice_channel = getattr(player, 'channel', None)
 
         if voice_channel:
             await voice_channel.edit(status=None)  # type: ignore

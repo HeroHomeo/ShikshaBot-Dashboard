@@ -5,12 +5,9 @@
  * ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
  * ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
  * ║                                                                  ║
- * ║           © 2026 CodeX Devs — All Rights Reserved               ║
+ * ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
  * ║                                                                  ║
- * ║   discord  ──  https://discord.gg/codexdev                      ║
- * ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
- * ║   github   ──  https://github.com/RayExo                        ║
- * ║                                                                  ║
+    * ║                                                                  ║
  * ╚══════════════════════════════════════════════════════════════════╝
  */
 
@@ -113,7 +110,7 @@ export function AdminContent() {
             </div>
             <div>
               <h1 className="text-4xl font-black text-white tracking-tight font-outfit">Admin Control Panel</h1>
-              <p className="text-slate-400 mt-2 font-medium">Restricted access for ZyroX administrators only.</p>
+              <p className="text-slate-400 mt-2 font-medium">Restricted access for ShikshaBot administrators only.</p>
             </div>
           </div>
           <button 

@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -16,7 +13,7 @@ from discord.ext import commands, tasks
 import datetime, pytz, time as t
 from discord.ui import Button, Select, View
 import aiosqlite, random, typing
-import sqlite3
+from db import sqlite3_mock as sqlite3
 import asyncio
 import discord, logging
 from utils.emoji import ARROWRED, TADAA, TICK
@@ -33,7 +30,8 @@ connection = sqlite3.connect(db_path)
 
 cursor = connection.cursor()
 
-cursor.execute('''CREATE TABLE IF NOT EXISTS Giveaway (
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS Giveaway (
                     guild_id INTEGER,
                     host_id INTEGER,
                     start_time TIMESTAMP,
@@ -231,6 +229,7 @@ class Giveaway(commands.Cog):
 
     @commands.Cog.listener("on_message_delete")
     async def GiveawayMessageDelete(self, message):
+        """Executes the GiveawayMessageDelete command."""
         await self.cursor.execute("SELECT message_id FROM Giveaway WHERE guild_id = ?", (message.guild.id,))
         re = await self.cursor.fetchone()
 

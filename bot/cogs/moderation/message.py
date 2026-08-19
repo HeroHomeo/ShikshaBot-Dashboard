@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -242,6 +239,7 @@ class Message(commands.Cog):
   @commands.has_permissions(manage_messages=True)
   @commands.bot_has_permissions(manage_messages=True)
   async def _purgebot(self, ctx, prefix=None, search=100):
+    """Executes the  purgebot command."""
 
     await ctx.message.delete()
 
@@ -260,6 +258,7 @@ class Message(commands.Cog):
   @commands.has_permissions(manage_messages=True)
   @commands.bot_has_permissions(manage_messages=True)
   async def purguser(self, ctx, member: discord.Member, search=100):
+      """Executes the purguser command."""
       
       await ctx.message.delete()
       await do_removal(ctx, search, lambda e: e.author == member)

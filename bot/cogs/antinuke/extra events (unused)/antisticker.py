@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from datetime import timedelta, datetime
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import asyncio
 
 class AntiSticker(commands.Cog):
@@ -27,6 +27,7 @@ class AntiSticker(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_stickers_update(self, guild, before, after):
+        """Executes the on guild stickers update command."""
         if len(after) > len(before):
             action = discord.AuditLogAction.sticker_create
         elif len(after) < len(before):

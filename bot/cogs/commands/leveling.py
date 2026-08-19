@@ -4,18 +4,15 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord 
 from utils.emoji import CROSS, TICK, ZWARNING
 from discord import app_commands 
-from discord .ext import commands 
+from discord.ext import commands, tasks 
 import aiosqlite 
 import asyncio 
 import json 
@@ -42,21 +39,25 @@ def utc_to_local (dt :datetime )->datetime :
     return dt .replace (tzinfo =timezone .utc )
 
 def format_number (num :int )->str :
-    """Format numbers with commas for better readability"""
+    """
+Format numbers with commas for better readability"""
     return f"{num:,}"
 
 def calculate_level_from_xp (xp :int )->int :
-    """Calculate level from XP using standard formula"""
+    """
+Calculate level from XP using standard formula"""
     if xp <0 :
         return 0 
     return int (math .sqrt (xp /100 ))
 
 def calculate_xp_for_level (level :int )->int :
-    """Calculate XP required for a specific level"""
+    """
+Calculate XP required for a specific level"""
     return level *level *100 
 
 def get_level_progress (xp :int )->tuple :
-    """Get current level, XP for current level, and XP for next level"""
+    """
+Get current level, XP for current level, and XP for next level"""
     current_level =calculate_level_from_xp (xp )
     current_level_xp =calculate_xp_for_level (current_level )
     next_level_xp =calculate_xp_for_level (current_level +1 )
@@ -65,20 +66,23 @@ def get_level_progress (xp :int )->tuple :
     return current_level ,progress ,needed 
 
 def get_progress_bar (current :int ,total :int ,length :int =10 )->str :
-    """Create a visual progress bar"""
+    """
+Create a visual progress bar"""
     if total ==0 :
         return "▱"*length 
     filled =int ((current /total )*length )
     return "▰"*filled +"▱"*(length -filled )
 
 def validate_hex_color (color :str )->bool :
-    """Validate hex color format"""
+    """
+Validate hex color format"""
     if not color .startswith ('#'):
         return False 
     return bool (re .match (r'^#(?:[0-9a-fA-F]{3}){1,2}$',color ))
 
 def hex_to_int (hex_color :str )->int :
-    """Convert hex color to integer"""
+    """
+Convert hex color to integer"""
     try :
         if not hex_color .startswith ('#'):
             hex_color ='#'+hex_color 
@@ -90,21 +94,22 @@ class PlaceholdersView (discord .ui .View ):
     def __init__ (self ):
         super ().__init__ (timeout =60 )
 
-    @discord .ui .button (label ="Show Placeholders",style =discord .ButtonStyle .secondary ,emoji ="📝")
-    async def show_placeholders (self ,interaction :discord .Interaction ,button :discord .ui .Button ):
-        embed =discord .Embed (
-        title ="📝 Available Placeholders",
-        description ="**You can use these placeholders in your level up message:**\n\n"
-        "`{user}` - Mentions the user (@username)\n"
-        "`{username}` - User's display name\n"
-        "`{level}` - The new level reached\n"
-        "`{server}` - Server name\n\n"
-        "**Example:**\n"
-        "`Congratulations {user}! You've reached level {level} in {server}!`",
-        color =0xFF0000 ,
-        timestamp =datetime .now (timezone .utc )
+    @discord.ui.button(label="Show Placeholders", style=discord.ButtonStyle.secondary, emoji="📝")
+    async def show_placeholders(self, interaction: discord.Interaction, button: discord.ui.Button):
+        embed = discord.Embed(
+            title="📝 Available Placeholders",
+            description="**You can use these placeholders in your level up message:**\n\n"
+                        "`{user}` - Mentions the user (@username)\n"
+                        "`{username}` - User's display name\n"
+                        "`{level}` - The new level reached\n"
+                        "`{server}` - Server name\n"
+                        "`{achievement}` - Name of the role reward unlocked (e.g., King of Spam)\n\n"
+                        "**Example:**\n"
+                        "`GG {user}, you just unlocked the achievement: {achievement}! 🥳`",
+            color=0xFF0000,
+            timestamp=datetime.now(timezone.utc)
         )
-        await interaction .response .send_message (embed =embed ,ephemeral =True )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 class LevelConfigModal (discord .ui .Modal ,title ="Leveling System Configuration"):
     def __init__ (self ,cog ,current_settings ):
@@ -121,13 +126,13 @@ class LevelConfigModal (discord .ui .Modal ,title ="Leveling System Configuratio
         max_length =3 
         )
 
-        self .level_up_message =discord .ui .TextInput (
-        label ="Level Up Message",
-        placeholder ="Use {user}, {level}, {username}, {server} as placeholders",
-        default =current_settings .get ('level_message','Congratulations {user}! You have reached level {level}!'),
-        required =True ,
-        style =discord .TextStyle .paragraph ,
-        max_length =2000 
+        self.level_up_message = discord.ui.TextInput(
+            label="Level Up Message",
+            placeholder="Use {user}, {level}, {username}, {server}, {achievement}",
+            default=current_settings.get('level_message', 'GG {user}, you just unlocked the achievement: {achievement}! 🥳'),
+            required=True,
+            style=discord.TextStyle.paragraph,
+            max_length=2000
         )
 
 
@@ -295,20 +300,53 @@ class Leveling (commands .Cog ):
 
     @commands.group (name ="level",invoke_without_command =True ,description ="Leveling system")
     async def level (self ,ctx ):
-        """Main leveling command"""
+        """
+Main leveling command"""
         if ctx .invoked_subcommand is None :
             await ctx .send_help (ctx .command )
 
-    async def cog_load (self ):
-        """Initialize database tables"""
-        try :
-            await self .init_database ()
+    async def cog_load(self):
+        """
+        Initialize database tables
+        """
+        try:
+            await self.init_database()
+            self.voice_xp_loop.start()
+        except Exception as e:
+            logger.error(f"Error loading Leveling cog: {e}")
 
-        except Exception as e :
-            logger .error (f"Error loading Leveling cog: {e}")
+    def cog_unload(self):
+        self.voice_xp_loop.cancel()
+
+    @tasks.loop(minutes=1)
+    async def voice_xp_loop(self):
+        for guild in self.bot.guilds:
+            try:
+                settings = await self.get_guild_settings(guild.id)
+                if not settings.get('enabled', False):
+                    continue
+
+                # Voice XP per minute logic (default to 10 if not set)
+                voice_xp_rate = settings.get('xp_per_minute_voice', 10)
+
+                for vc in guild.voice_channels:
+                    for member in vc.members:
+                        if member.bot or member.voice.self_deaf or member.voice.afk:
+                            continue
+                        
+                        old_level, new_level = await self._award_xp(guild.id, member.id, voice_xp_rate, is_message=False)
+                        if new_level > old_level:
+                            await self.handle_level_up(guild, member, new_level, settings)
+            except Exception as e:
+                logger.error(f"Error in voice_xp_loop for guild {guild.id}: {e}")
+
+    @voice_xp_loop.before_loop
+    async def before_voice_xp_loop(self):
+        await self.bot.wait_until_ready()
 
     async def init_database (self ):
-        """Initialize all required database tables"""
+        """
+Initialize all required database tables"""
         try :
             async with aiosqlite .connect ("db/leveling.db")as db :
 
@@ -407,7 +445,8 @@ class Leveling (commands .Cog ):
             logger .error (f"Database initialization error: {e}")
 
     async def get_guild_settings (self ,guild_id :int )->dict :
-        """Get guild leveling settings"""
+        """
+Get guild leveling settings"""
         max_retries =5 
         for attempt in range (max_retries ):
             try :
@@ -472,7 +511,8 @@ class Leveling (commands .Cog ):
         }
 
     async def is_blacklisted (self ,guild_id :int ,user_id :int ,channel_id :int )->bool :
-        """Check if user or channel is blacklisted"""
+        """
+Check if user or channel is blacklisted"""
         try :
             async with aiosqlite .connect ("db/leveling.db")as db :
 
@@ -511,7 +551,8 @@ class Leveling (commands .Cog ):
             return False 
 
     async def get_xp_multiplier (self ,guild_id :int ,user_id :int ,channel_id :int )->float :
-        """Get XP multiplier for user"""
+        """
+Get XP multiplier for user"""
         try :
             guild =self .bot .get_guild (guild_id )
             if not guild :
@@ -550,7 +591,8 @@ class Leveling (commands .Cog ):
 
     @commands .Cog .listener ()
     async def on_message (self ,message ):
-        """Handle message XP tracking with independent message tracking system"""
+        """
+Handle message XP tracking with independent message tracking system"""
         if message .author .bot or not message .guild :
             return 
 
@@ -593,125 +635,138 @@ class Leveling (commands .Cog ):
             final_xp =int (final_xp *multiplier )
 
 
-            async with aiosqlite .connect ("db/leveling.db")as db :
-                async with db .execute (
+            old_level, new_level = await self._award_xp(guild_id, user_id, final_xp, is_message=True)
+
+            if new_level > old_level:
+                await self.handle_level_up(message.guild, message.author, new_level, settings, fallback_channel=message.channel)
+
+        except Exception as e:
+            logger.error(f"Error handling message XP: {e}")
+
+    async def _award_xp(self, guild_id, user_id, amount, is_message=False):
+        now = datetime.now()
+        async with aiosqlite.connect("db/leveling.db") as db:
+            async with db.execute(
                 "SELECT xp, messages FROM user_xp WHERE guild_id = ? AND user_id = ?",
-                (guild_id ,user_id )
-                )as cursor :
-                    row =await cursor .fetchone ()
+                (guild_id, user_id)
+            ) as cursor:
+                row = await cursor.fetchone()
 
-                if row and len (row )>=2 :
-                    current_xp =row [0 ]if row [0 ]is not None else 0 
-                    current_messages =row [1 ]if row [1 ]is not None else 0 
-                    old_level =calculate_level_from_xp (current_xp )
-                    new_xp =current_xp +final_xp 
-                    new_level =calculate_level_from_xp (new_xp )
-                    new_messages =current_messages +1 
+            if row and len(row) >= 2:
+                current_xp = row[0] if row[0] is not None else 0
+                current_messages = row[1] if row[1] is not None else 0
+                old_level = calculate_level_from_xp(current_xp)
+                new_xp = current_xp + amount
+                new_level = calculate_level_from_xp(new_xp)
+                new_messages = current_messages + (1 if is_message else 0)
 
-                    await db .execute ("""
-                        UPDATE user_xp 
-                        SET xp = ?, messages = ?, last_message_time = ?
-                        WHERE guild_id = ? AND user_id = ?
-                    """,(new_xp ,new_messages ,now .isoformat (),guild_id ,user_id ))
-                else :
-                    old_level =0 
-                    new_level =calculate_level_from_xp (final_xp )
-                    new_messages =1 
+                await db.execute("""
+                    UPDATE user_xp 
+                    SET xp = ?, messages = ?, last_message_time = ?
+                    WHERE guild_id = ? AND user_id = ?
+                """, (new_xp, new_messages, now.isoformat(), guild_id, user_id))
+            else:
+                old_level = 0
+                new_level = calculate_level_from_xp(amount)
+                new_messages = 1 if is_message else 0
+                new_xp = amount
 
-                    await db .execute ("""
-                        INSERT INTO user_xp (guild_id, user_id, xp, messages, last_message_time)
-                        VALUES (?, ?, ?, ?, ?)
-                    """,(guild_id ,user_id ,final_xp ,new_messages ,now .isoformat ()))
+                await db.execute("""
+                    INSERT INTO user_xp (guild_id, user_id, xp, messages, last_message_time)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (guild_id, user_id, new_xp, new_messages, now.isoformat()))
 
+            await db.execute("""
+                INSERT OR REPLACE INTO users (guild_id, user_id, xp, level)
+                VALUES (?, ?, ?, ?)
+            """, (guild_id, user_id, new_xp, new_level))
 
-                current_new_xp =new_xp if 'new_xp'in locals ()else final_xp 
-                current_new_level =new_level if 'new_level'in locals ()else calculate_level_from_xp (final_xp )
-                await db .execute ("""
-                    INSERT OR REPLACE INTO users (guild_id, user_id, xp, level)
-                    VALUES (?, ?, ?, ?)
-                """,(guild_id ,user_id ,current_new_xp ,current_new_level ))
+            await db.commit()
+            
+        return old_level, new_level
 
-                await db .commit ()
+    async def handle_level_up(self, guild, member, new_level, settings, fallback_channel=None):
+        """
+        Handle level up notification and rewards
+        """
+        try:
+            channel_id = settings.get('channel_id')
+            channel = None
 
+            if channel_id:
+                channel = self.bot.get_channel(channel_id)
+                if channel and not channel.permissions_for(guild.me).send_messages:
+                    logger.warning(f"No permission to send messages in configured level channel {channel_id}")
+                    channel = None
 
-            if new_level >old_level :
-                await self .handle_level_up (message ,new_level ,settings )
+            if not channel:
+                if not channel_id:
+                    channel = fallback_channel
+                else:
+                    logger.error(f"Configured level channel {channel_id} not found or not accessible")
+                    return
 
-        except Exception as e :
-            logger .error (f"Error handling message XP: {e}")
+            if not channel:
+                return
+                
+            achievement_name = "New Level"
+            async with aiosqlite.connect("db/leveling.db") as db:
+                async with db.execute(
+                    "SELECT role_id FROM level_rewards WHERE guild_id = ? AND level = ?",
+                    (guild.id, new_level)
+                ) as cursor:
+                    reward = await cursor.fetchone()
+                    if reward:
+                        role = guild.get_role(reward[0])
+                        if role:
+                            achievement_name = role.name
 
-    async def handle_level_up (self ,message ,new_level ,settings ):
-        """Handle level up notification and rewards"""
-        try :
-
-            channel_id =settings .get ('channel_id')
-            channel =None 
-
-            if channel_id :
-                channel =self .bot .get_channel (channel_id )
-
-                if channel and not channel .permissions_for (message .guild .me ).send_messages :
-                    logger .warning (f"No permission to send messages in configured level channel {channel_id}")
-                    channel =None 
-
-
-            if not channel :
-                if not channel_id :
-
-                    channel =message .channel 
-                else :
-
-                    logger .error (f"Configured level channel {channel_id} not found or not accessible")
-                    return 
-
-
-            level_message =settings .get ('level_message','Congratulations {user}! You have reached level {level}!')
-            level_message =level_message .replace ('{user}',message .author .mention )
-            level_message =level_message .replace ('{level}',str (new_level ))
-            level_message =level_message .replace ('{username}',message .author .display_name )
-            level_message =level_message .replace ('{server}',message .guild .name )
+            level_message = settings.get('level_message', 'Congratulations {user}! You have reached level {level}!')
+            level_message = level_message.replace('{user}', member.mention)
+            level_message = level_message.replace('{level}', str(new_level))
+            level_message = level_message.replace('{username}', member.display_name)
+            level_message = level_message.replace('{server}', guild.name)
+            level_message = level_message.replace('{achievement}', achievement_name)
 
 
             embed_color =settings .get ('embed_color','#FF0000')
             if isinstance (embed_color ,str ):
                 embed_color =hex_to_int (embed_color )
 
-            embed =discord .Embed (
-            title ="🎉 Level Up!",
-            description =level_message ,
-            color =0xFF0000 ,
-            timestamp =datetime .now (timezone .utc )
+            embed = discord.Embed(
+                title="🎉 Level Up!",
+                description=level_message,
+                color=embed_color,
+                timestamp=datetime.now(timezone.utc)
             )
 
-            if settings .get ('thumbnail_enabled',True ):
-                embed .set_thumbnail (url =message .author .display_avatar .url )
+            if settings.get('thumbnail_enabled', True):
+                embed.set_thumbnail(url=member.display_avatar.url)
 
-            if settings .get ('level_image'):
-                embed .set_image (url =settings ['level_image'])
+            if settings.get('level_image'):
+                embed.set_image(url=settings['level_image'])
 
-            embed .set_footer (text =f"Level {new_level} • {message.guild.name}")
+            embed.set_footer(text=f"Level {new_level} • {guild.name}")
 
-            try :
-                await channel .send (embed =embed )
-                logger .info (f"Level up message sent for {message.author} (Level {new_level}) in channel {channel.id}")
-            except discord .Forbidden :
-                logger .error (f"No permission to send level up message in channel {channel.id}")
-            except discord .NotFound :
-                logger .error (f"Level up channel {channel.id} not found")
-            except Exception as e :
-                logger .error (f"Error sending level up message: {e}")
+            try:
+                await channel.send(embed=embed)
+                logger.info(f"Level up message sent for {member} (Level {new_level}) in channel {channel.id}")
+            except discord.Forbidden:
+                logger.error(f"No permission to send level up message in channel {channel.id}")
+            except discord.NotFound:
+                logger.error(f"Level up channel {channel.id} not found")
+            except Exception as e:
+                logger.error(f"Error sending level up message: {e}")
 
-
-            await self .give_level_rewards (message .guild ,message .author ,new_level )
-
-
-            await self .apply_level_roles (message .guild ,message .author ,new_level )
+            await self.give_level_rewards(guild, member, new_level)
+            await self.apply_level_roles(guild, member, new_level)
 
         except Exception as e :
             logger .error (f"Error handling level up: {e}")
 
     async def give_level_rewards (self ,guild ,member ,level ):
-        """Give role rewards for reaching a level"""
+        """
+Give role rewards for reaching a level"""
         try :
             async with aiosqlite .connect ("db/leveling.db")as db :
                 async with db .execute (
@@ -743,7 +798,8 @@ class Leveling (commands .Cog ):
             logger .error (f"Error giving level rewards: {e}")
 
     async def apply_level_roles (self ,guild ,member ,level ):
-        """Apply level roles for reaching a level"""
+        """
+Apply level roles for reaching a level"""
         try :
             async with aiosqlite .connect ("db/leveling.db")as db :
                 async with db .execute (
@@ -766,7 +822,8 @@ class Leveling (commands .Cog ):
             logger .error (f"Error applying level roles: {e}")
 
     async def get_user_data (self ,guild_id :int ,user_id :int )->tuple :
-        """Get user XP and level data"""
+        """
+Get user XP and level data"""
         try :
             async with aiosqlite .connect ("db/leveling.db")as db :
                 async with db .execute (
@@ -784,7 +841,8 @@ class Leveling (commands .Cog ):
             return 0 ,0 ,0 
 
     async def get_user_rank (self ,guild_id :int ,user_id :int )->int :
-        """Get user's rank in the guild"""
+        """
+Get user's rank in the guild"""
         try :
             async with aiosqlite .connect ("db/leveling.db")as db :
                 async with db .execute (
@@ -798,13 +856,13 @@ class Leveling (commands .Cog ):
             return 1 
 
     def create_simple_rank_card (self ,member ,xp ,level ,rank ,messages ):
-        """Create a simple text-based rank card when PIL fails"""
+        """
+Create a simple text-based rank card when PIL fails"""
         try :
             current_level ,progress ,needed =get_level_progress (xp )
             progress_bar =get_progress_bar (progress ,needed ,20 )
 
-            rank_text =f"""
-┌─────────────────────────────────────────┐
+            rank_text =f"""┌─────────────────────────────────────────┐
 │ 🎮 RANK CARD - {member.display_name[:20]}
 ├─────────────────────────────────────────┤
 │ 📊 Rank: #{rank:,}
@@ -823,7 +881,8 @@ class Leveling (commands .Cog ):
             return f"**{member.display_name}** - Level {level} - Rank #{rank}"
 
     async def create_rank_card (self ,member ,guild_id ):
-        """Create rank card with random design selection - fallback to text if PIL fails"""
+        """
+Create rank card with random design selection - fallback to text if PIL fails"""
         try :
             xp ,level ,messages =await self .get_user_data (guild_id ,member .id )
             rank =await self .get_user_rank (guild_id ,member .id )
@@ -849,7 +908,8 @@ class Leveling (commands .Cog ):
             return None 
 
     async def create_rank_card_design (self ,member ,xp ,level ,rank ,messages ,design_number ):
-        """Create specific rank card design based on design number"""
+        """
+Create specific rank card design based on design number"""
         current_level ,progress ,needed =get_level_progress (xp )
         width ,height =900 ,300 
 
@@ -879,7 +939,8 @@ class Leveling (commands .Cog ):
             return await self .create_cyberpunk_design (member ,xp ,level ,rank ,messages ,current_level ,progress ,needed ,width ,height ,font_large ,font_medium ,font_small )
 
     async def create_classic_design (self ,member ,xp ,level ,rank ,messages ,current_level ,progress ,needed ,width ,height ,font_large ,font_medium ,font_small ):
-        """Original design with diagonal gradient"""
+        """
+Original design with diagonal gradient"""
         img =Image .new ('RGB',(width ,height ),(32 ,34 ,37 ))
         draw =ImageDraw .Draw (img )
 
@@ -922,7 +983,8 @@ class Leveling (commands .Cog ):
         return img_bytes 
 
     async def create_neon_design (self ,member ,xp ,level ,rank ,messages ,current_level ,progress ,needed ,width ,height ,font_large ,font_medium ,font_small ):
-        """Neon cyberpunk style design"""
+        """
+Neon cyberpunk style design"""
         img =Image .new ('RGB',(width ,height ),(10 ,10 ,25 ))
         draw =ImageDraw .Draw (img )
 
@@ -950,7 +1012,8 @@ class Leveling (commands .Cog ):
         return img_bytes 
 
     async def create_space_design (self ,member ,xp ,level ,rank ,messages ,current_level ,progress ,needed ,width ,height ,font_large ,font_medium ,font_small ):
-        """Space theme with stars and nebula"""
+        """
+Space theme with stars and nebula"""
         img =Image .new ('RGB',(width ,height ),(5 ,5 ,20 ))
         draw =ImageDraw .Draw (img )
 
@@ -983,7 +1046,8 @@ class Leveling (commands .Cog ):
         return img_bytes 
 
     async def create_minimal_design (self ,member ,xp ,level ,rank ,messages ,current_level ,progress ,needed ,width ,height ,font_large ,font_medium ,font_small ):
-        """Clean minimal design"""
+        """
+Clean minimal design"""
         img =Image .new ('RGB',(width ,height ),(248 ,249 ,250 ))
         draw =ImageDraw .Draw (img )
 
@@ -1002,7 +1066,8 @@ class Leveling (commands .Cog ):
         return img_bytes 
 
     async def create_gaming_design (self ,member ,xp ,level ,rank ,messages ,current_level ,progress ,needed ,width ,height ,font_large ,font_medium ,font_small ):
-        """Gaming RGB style design"""
+        """
+Gaming RGB style design"""
         img =Image .new ('RGB',(width ,height ),(20 ,20 ,20 ))
         draw =ImageDraw .Draw (img )
 
@@ -1025,7 +1090,8 @@ class Leveling (commands .Cog ):
         return img_bytes 
 
     async def create_elegant_design (self ,member ,xp ,level ,rank ,messages ,current_level ,progress ,needed ,width ,height ,font_large ,font_medium ,font_small ):
-        """Elegant gold and black design"""
+        """
+Elegant gold and black design"""
         img =Image .new ('RGB',(width ,height ),(25 ,25 ,25 ))
         draw =ImageDraw .Draw (img )
 
@@ -1047,7 +1113,8 @@ class Leveling (commands .Cog ):
         return img_bytes 
 
     async def create_cyberpunk_design (self ,member ,xp ,level ,rank ,messages ,current_level ,progress ,needed ,width ,height ,font_large ,font_medium ,font_small ):
-        """Cyberpunk style design"""
+        """
+Cyberpunk style design"""
         img =Image .new ('RGB',(width ,height ),(15 ,15 ,15 ))
         draw =ImageDraw .Draw (img )
 
@@ -1071,8 +1138,8 @@ class Leveling (commands .Cog ):
         return img_bytes 
 
     async def add_avatar_and_content_classic (self ,draw ,member ,level ,rank ,messages ,xp ,progress ,needed ,width ,height ,font_large ,font_medium ,font_small ):
-        """Add avatar and content for classic design"""
-
+        """
+Add avatar and content for classic design"""
         avatar_size =120 
         avatar_x ,avatar_y =30 ,90 
 
@@ -1160,7 +1227,8 @@ class Leveling (commands .Cog ):
                 draw .text (pos ,"✨",font =font_small ,fill =(255 ,255 ,255 ))
 
     async def add_avatar_and_content_neon (self ,draw ,member ,level ,rank ,messages ,xp ,progress ,needed ,width ,height ,font_large ,font_medium ,font_small ):
-        """Add avatar and content for neon design"""
+        """
+Add avatar and content for neon design"""
         avatar_size =100 
         avatar_x ,avatar_y =40 ,100 
 
@@ -1227,7 +1295,8 @@ class Leveling (commands .Cog ):
         draw .text ((stats_x ,stats_y +50 ),f"📈 {percentage:.1f}%",font =font_small ,fill =(0 ,255 ,255 ))
 
     async def add_avatar_and_content_space (self ,draw ,member ,level ,rank ,messages ,xp ,progress ,needed ,width ,height ,font_large ,font_medium ,font_small ):
-        """Add avatar and content for space design"""
+        """
+Add avatar and content for space design"""
         avatar_size =110 
         avatar_x ,avatar_y =35 ,95 
 
@@ -1300,7 +1369,8 @@ class Leveling (commands .Cog ):
         draw .text ((stats_x ,185 ),f"🌌 {percentage:.1f}%",font =font_small ,fill =(100 ,200 ,255 ))
 
     async def add_avatar_and_content_minimal (self ,draw ,member ,level ,rank ,messages ,xp ,progress ,needed ,width ,height ,font_large ,font_medium ,font_small ):
-        """Add avatar and content for minimal design"""
+        """
+Add avatar and content for minimal design"""
         avatar_size =100 
         avatar_x ,avatar_y =40 ,100 
 
@@ -1362,7 +1432,8 @@ class Leveling (commands .Cog ):
         draw .text ((stats_x ,145 ),f"Progress: {percentage:.1f}%",font =font_small ,fill =(120 ,120 ,120 ))
 
     async def add_avatar_and_content_gaming (self ,draw ,member ,xp ,progress ,needed ,messages ,level ,rank ,width ,height ,font_large ,font_medium ,font_small ):
-        """Add avatar and content for gaming design"""
+        """
+Add avatar and content for gaming design"""
         avatar_size =110 
         avatar_x ,avatar_y =35 ,95 
 
@@ -1433,7 +1504,8 @@ class Leveling (commands .Cog ):
         draw .text ((stats_x ,145 ),f"Progress: {percentage:.1f}%",font =font_small ,fill =(150 ,150 ,150 ))
 
     async def add_avatar_and_content_elegant (self ,draw ,member ,xp ,progress ,needed ,messages ,level ,rank ,width ,height ,font_large ,font_medium ,font_small ):
-        """Add avatar and content for elegant design"""
+        """
+Add avatar and content for elegant design"""
         avatar_size =110 
         avatar_x ,avatar_y =35 ,95 
 
@@ -1503,7 +1575,8 @@ class Leveling (commands .Cog ):
         draw .text ((stats_x ,145 ),f"Progress: {percentage:.1f}%",font =font_small ,fill =(200 ,200 ,200 ))
 
     async def add_avatar_and_content_cyberpunk (self ,draw ,member ,xp ,progress ,needed ,messages ,level ,rank ,width ,height ,font_large ,font_medium ,font_small ):
-        """Add avatar and content for cyberpunk design"""
+        """
+Add avatar and content for cyberpunk design"""
         avatar_size =100 
         avatar_x ,avatar_y =40 ,100 
 
@@ -1564,7 +1637,8 @@ class Leveling (commands .Cog ):
 
     @level .command (name ="rank",description ="View your current rank and level")
     async def rank (self ,ctx ,member :Optional [discord .Member ]=None ):
-        """Display rank card"""
+        """
+Display rank card"""
         member =member or ctx .author 
         guild_id =ctx .guild .id 
 
@@ -1592,7 +1666,8 @@ class Leveling (commands .Cog ):
     @level .command (name ="settings",description ="Configure leveling settings",aliases =['config'])
     @commands .has_permissions (administrator =True )
     async def settings (self ,ctx ):
-        """Leveling settings configuration"""
+        """
+Leveling settings configuration"""
         try :
             current_settings =await self .get_guild_settings (ctx .guild .id )
 
@@ -1609,7 +1684,8 @@ class Leveling (commands .Cog ):
             pass 
 
     async def interactive_setup (self ,ctx ,current_settings ):
-        """Interactive setup for prefix commands"""
+        """
+Interactive setup for prefix commands"""
         try :
             embed =discord .Embed (
             title ="🔧 Interactive Leveling Setup",
@@ -1833,7 +1909,8 @@ class Leveling (commands .Cog ):
     @level .command (name ="setxp",description ="Set XP amount per message")
     @commands .has_permissions (administrator =True )
     async def setxp (self ,ctx ,amount :int ):
-        """Set XP per message amount"""
+        """
+Set XP per message amount"""
         try :
             if amount <1 or amount >999 :
                 await ctx .send (f"{CROSS} XP per message must be between 1 and 999!")
@@ -1865,7 +1942,8 @@ class Leveling (commands .Cog ):
     @level .command (name ="setmessage",description ="Set level-up message")
     @commands .has_permissions (administrator =True )
     async def setmessage (self ,ctx ,*,message :str ):
-        """Set level-up message"""
+        """
+Set level-up message"""
         try :
             if len (message )>2000 :
                 await ctx .send (f"{CROSS} Level-up message must be less than 2000 characters!")
@@ -1897,7 +1975,8 @@ class Leveling (commands .Cog ):
     @level .command (name ="setcolor",description ="Set embed color")
     @commands .has_permissions (administrator =True )
     async def setcolor (self ,ctx ,color :str ):
-        """Set embed color"""
+        """
+Set embed color"""
         try :
 
             if not color .startswith ('#'):
@@ -1935,7 +2014,8 @@ class Leveling (commands .Cog ):
     @level .command (name ="thumbnail",description ="Toggle user thumbnail in level-up messages")
     @commands .has_permissions (administrator =True )
     async def thumbnail (self ,ctx ,setting :str ):
-        """Toggle thumbnail setting"""
+        """
+Toggle thumbnail setting"""
         try :
             setting =setting .lower ()
             if setting not in ['on','off','true','false','yes','no','enable','disable']:
@@ -1970,7 +2050,8 @@ class Leveling (commands .Cog ):
     @level .command (name ="cooldown",description ="Set message cooldown in seconds")
     @commands .has_permissions (administrator =True )
     async def cooldown (self ,ctx ,seconds :int ):
-        """Set message cooldown"""
+        """
+Set message cooldown"""
         try :
             if seconds <0 or seconds >3600 :
                 await ctx .send (f"{CROSS} Cooldown must be between 0 and 3600 seconds (1 hour)!")
@@ -2001,14 +2082,16 @@ class Leveling (commands .Cog ):
 
     @level .group (name ="rewards",invoke_without_command =True ,description ="Manage level rewards")
     async def rewards (self ,ctx ):
-        """Level rewards management"""
+        """
+Level rewards management"""
         if ctx .invoked_subcommand is None :
             await ctx .send_help (ctx .command )
 
     @rewards .command (name ="add",description ="Add a level reward")
     @commands .has_permissions (administrator =True )
     async def rewards_add (self ,ctx ,level :int ,role :discord .Role ,remove_previous :bool =False ):
-        """Add level reward"""
+        """
+Add level reward"""
         try :
             if level <=0 :
                 await ctx .send ("Level must be greater than 0.")
@@ -2029,7 +2112,8 @@ class Leveling (commands .Cog ):
     @rewards .command (name ="remove",description ="Remove a level reward")
     @commands .has_permissions (administrator =True )
     async def rewards_remove (self ,ctx ,level :int ):
-        """Remove level reward"""
+        """
+Remove level reward"""
         try :
             async with aiosqlite .connect ("db/leveling.db")as db :
                 await db .execute (
@@ -2046,7 +2130,8 @@ class Leveling (commands .Cog ):
     @rewards .command (name ="list",description ="List all level rewards")
     @commands .has_permissions (administrator =True )
     async def rewards_list (self ,ctx ):
-        """List level rewards"""
+        """
+List level rewards"""
         try :
             async with aiosqlite .connect ("db/leveling.db")as db :
                 async with db .execute (
@@ -2072,14 +2157,16 @@ class Leveling (commands .Cog ):
 
     @level .group (name ="multiplier",invoke_without_command =True ,description ="Manage XP multipliers")
     async def multiplier (self ,ctx ):
-        """XP multiplier management"""
+        """
+XP multiplier management"""
         if ctx .invoked_subcommand is None :
             await ctx .send_help (ctx .command )
 
     @multiplier .command (name ="add",description ="Add an XP multiplier")
     @commands .has_permissions (administrator =True )
     async def multiplier_add (self ,ctx ,target_type :str ,target :str ,multiplier :float ):
-        """Add XP multiplier"""
+        """
+Add XP multiplier"""
         try :
             if target_type not in ["role","channel"]:
                 await ctx .send ("Invalid target type. Must be 'role' or 'channel'.")
@@ -2119,7 +2206,8 @@ class Leveling (commands .Cog ):
     @multiplier .command (name ="remove",description ="Remove an XP multiplier")
     @commands .has_permissions (administrator =True )
     async def multiplier_remove (self ,ctx ,target_type :str ,target :str ):
-        """Remove XP multiplier"""
+        """
+Remove XP multiplier"""
         try :
             if target_type not in ["role","channel"]:
                 await ctx .send ("Invalid target type. Must be 'role' or 'channel'.")
@@ -2155,7 +2243,8 @@ class Leveling (commands .Cog ):
     @multiplier .command (name ="list",description ="List all XP multipliers")
     @commands .has_permissions (administrator =True )
     async def multiplier_list (self ,ctx ):
-        """List XP multipliers"""
+        """
+List XP multipliers"""
         try :
             async with aiosqlite .connect ("db/leveling.db")as db :
                 async with db .execute (
@@ -2185,14 +2274,16 @@ class Leveling (commands .Cog ):
 
     @level .group (name ="blacklist",invoke_without_command =True ,description ="Manage leveling blacklists")
     async def blacklist (self ,ctx ):
-        """Leveling blacklist management"""
+        """
+Leveling blacklist management"""
         if ctx .invoked_subcommand is None :
             await ctx .send_help (ctx .command )
 
     @blacklist .command (name ="add",description ="Add to the leveling blacklist")
     @commands .has_permissions (administrator =True )
     async def blacklist_add (self ,ctx ,target_type :str ,target :str ):
-        """Add to leveling blacklist"""
+        """
+Add to leveling blacklist"""
         try :
             if target_type not in ["role","channel"]:
                 await ctx .send ("Invalid target type. Must be 'role' or 'channel'.")
@@ -2228,7 +2319,8 @@ class Leveling (commands .Cog ):
     @blacklist .command (name ="remove",description ="Remove from the leveling blacklist")
     @commands .has_permissions (administrator =True )
     async def blacklist_remove (self ,ctx ,target_type :str ,target :str ):
-        """Remove from leveling blacklist"""
+        """
+Remove from leveling blacklist"""
         try :
             if target_type not in ["role","channel"]:
                 await ctx .send ("Invalid target type. Must be 'role' or 'channel'.")
@@ -2264,7 +2356,8 @@ class Leveling (commands .Cog ):
     @blacklist .command (name ="list",description ="List the leveling blacklist")
     @commands .has_permissions (administrator =True )
     async def blacklist_list (self ,ctx ):
-        """List leveling blacklist"""
+        """
+List leveling blacklist"""
         try :
             async with aiosqlite .connect ("db/leveling.db")as db :
                 async with db .execute (
@@ -2293,7 +2386,8 @@ class Leveling (commands .Cog ):
             pass 
 
     async def apply_level_roles (self ,guild ,member ,level ):
-        """Apply level-based roles to a member."""
+        """
+Apply level-based roles to a member."""
         try :
             async with aiosqlite .connect (self .db_path )as db :
                 async with db .execute ("SELECT role_id FROM level_roles WHERE guild_id = ? AND level = ?",(guild .id ,level ))as cursor :
@@ -2317,7 +2411,8 @@ class Leveling (commands .Cog ):
     @commands .hybrid_command (name ="setlevelrole",description ="Set a role for a specific level (admin only)")
     @commands .has_permissions (administrator =True )
     async def set_level_role (self ,ctx ,level :int ,role :discord .Role ):
-        """Set a level role."""
+        """
+Set a level role."""
         try :
             if level <=0 :
                 await ctx .send ("Level must be greater than 0.")
@@ -2335,7 +2430,8 @@ class Leveling (commands .Cog ):
     @commands .hybrid_command (name ="removelevelrole",description ="Remove a level role (admin only)")
     @commands .has_permissions (administrator =True )
     async def remove_level_role (self ,ctx ,level :int ):
-        """Remove a level role."""
+        """
+Remove a level role."""
         try :
             async with aiosqlite .connect (self .db_path )as db :
                 await db .execute ("DELETE FROM level_roles WHERE guild_id = ? AND level = ?",(ctx .guild .id ,level ))
@@ -2349,7 +2445,8 @@ class Leveling (commands .Cog ):
     @commands .hybrid_command (name ="listlevelroles",description ="List all level roles (admin only)")
     @commands .has_permissions (administrator =True )
     async def list_level_roles (self ,ctx ):
-        """List all level roles."""
+        """
+List all level roles."""
         try :
             async with aiosqlite .connect (self .db_path )as db :
                 async with db .execute ("SELECT level, role_id FROM level_roles WHERE guild_id = ?",(ctx .guild .id ,))as cursor :
@@ -2373,7 +2470,8 @@ class Leveling (commands .Cog ):
     @commands .hybrid_command (name ="resetxp",description ="Reset a user's XP (admin only)")
     @commands .has_permissions (administrator =True )
     async def reset_xp (self ,ctx ,member :discord .Member ):
-        """Reset a user's XP and level to default values."""
+        """
+Reset a user's XP and level to default values."""
         try :
             async with aiosqlite .connect (self .db_path )as db :
                 await db .execute ("UPDATE users SET xp = 0, level = 1 WHERE guild_id = ? AND user_id = ?",(ctx .guild .id ,member .id ))
@@ -2387,7 +2485,8 @@ class Leveling (commands .Cog ):
     @commands .hybrid_command (name ="setxp",description ="Set a user's XP (admin only)")
     @commands .has_permissions (administrator =True )
     async def set_xp (self ,ctx ,member :discord .Member ,xp :int ):
-        """Set a user's XP to a specific value."""
+        """
+Set a user's XP to a specific value."""
         try :
             level =calculate_level_from_xp (xp )
             async with aiosqlite .connect (self .db_path )as db :
@@ -2402,7 +2501,8 @@ class Leveling (commands .Cog ):
     @commands .hybrid_command (name ="setlevel",description ="Set a user's level (admin only)")
     @commands .has_permissions (administrator =True )
     async def set_level (self ,ctx ,member :discord .Member ,level :int ):
-        """Set a user's level to a specific value."""
+        """
+Set a user's level to a specific value."""
         try :
             xp =calculate_xp_for_level (level )
             async with aiosqlite .connect (self .db_path )as db :
@@ -2417,7 +2517,8 @@ class Leveling (commands .Cog ):
     @level .command (name ="leaderboard",description ="View the server level leaderboard")
     @commands .cooldown (1 ,10 ,commands .BucketType .guild )
     async def level_leaderboard (self ,ctx ):
-        """Display server level leaderboard"""
+        """
+Display server level leaderboard"""
         try :
             if isinstance (ctx ,discord .Interaction ):
                 await ctx .response .defer ()
@@ -2481,7 +2582,8 @@ class Leveling (commands .Cog ):
                 await ctx .send (error_msg )
 
     async def create_leaderboard_image (self ,guild ,top_users ):
-        """Create enhanced visual leaderboard image with custom background support and modern design"""
+        """
+Create enhanced visual leaderboard image with custom background support and modern design"""
         try :
             if not PIL_AVAILABLE :
                 return self .create_text_leaderboard (guild ,top_users )
@@ -2874,7 +2976,8 @@ class Leveling (commands .Cog ):
             return self .create_text_leaderboard (guild ,top_users )
 
     def create_text_leaderboard (self ,guild ,top_users ):
-        """Create text-based leaderboard when image creation fails"""
+        """
+Create text-based leaderboard when image creation fails"""
         try :
             leaderboard_text =f"🏆 **{guild.name} Level Leaderboard** 🏆\n\n"
 
@@ -2905,7 +3008,8 @@ class Leveling (commands .Cog ):
 
     @level .command (name ="placeholders",description ="Show available placeholders for level-up messages")
     async def placeholders (self ,ctx ):
-        """Show placeholders for level-up messages"""
+        """
+Show placeholders for level-up messages"""
         embed =discord .Embed (
         title ="📝 Available Placeholders",
         description =(
@@ -2925,6 +3029,7 @@ class Leveling (commands .Cog ):
     @level .command (name ="enable",description ="Enable the leveling system")
     @commands .has_permissions (administrator =True )
     async def enable (self ,ctx ):
+        """Executes the enable command."""
         try :
             async with aiosqlite .connect (self .db_path )as db :
 
@@ -2962,6 +3067,7 @@ class Leveling (commands .Cog ):
     @level .command (name ="disable",description ="Disable the leveling system")
     @commands .has_permissions (administrator =True )
     async def disable (self ,ctx ):
+        """Executes the disable command."""
         try :
             async with aiosqlite .connect (self .db_path )as db :
 
@@ -2998,7 +3104,8 @@ class Leveling (commands .Cog ):
 
     @level .command (name ="stats",description ="View detailed level statistics")
     async def stats (self ,ctx ,member :Optional [discord .Member ]=None ):
-        """Display detailed user level statistics with rank card"""
+        """
+Display detailed user level statistics with rank card"""
         member =member or ctx .author 
         guild_id =ctx .guild .id 
 
@@ -3137,6 +3244,7 @@ class Leveling (commands .Cog ):
     @level .command (name ="channel",description ="Set the level-up announcement channel")
     @commands .has_permissions (administrator =True )
     async def channel (self ,ctx ,channel :discord .TextChannel ):
+        """Executes the channel command."""
         try :
             async with aiosqlite .connect (self .db_path )as db :
 

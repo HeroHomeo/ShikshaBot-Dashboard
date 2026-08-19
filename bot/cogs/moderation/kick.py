@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -35,7 +32,8 @@ class Kick(commands.Cog):
     @commands.bot_has_permissions(kick_members=True)
     @commands.guild_only()
     async def kick_command(self, ctx, member: discord.Member, *, reason: str = None):
-        """Kicks a member from the server with an optional reason."""
+        """
+Kicks a member from the server with an optional reason."""
         reason = reason or "No reason provided"
 
         # --- Hierarchy and permission checks ---

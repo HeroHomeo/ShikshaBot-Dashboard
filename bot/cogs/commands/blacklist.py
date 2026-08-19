@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -16,7 +13,7 @@ import discord
 from utils.emoji import CROSS, TICK
 from discord.ext import commands
 from discord.ext import menus
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import os
 from utils.Tools import *
 from utils.cv2 import CV2, build_container
@@ -183,6 +180,7 @@ class Blacklist(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        """Executes the on message command."""
         if message.author.bot:
             return
 
@@ -212,6 +210,8 @@ class Blacklist(commands.Cog):
     @ignore_check()
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def blacklistword(self, ctx):
+        """
+Executes the blacklistword command."""
         commands_list = [
             "➜ `blacklistword add <word>` - Add a word to the blacklist.",
             "➜ `blacklistword remove <word>` - Remove a word from the blacklist.",
@@ -234,6 +234,7 @@ class Blacklist(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.has_permissions(administrator=True)
     async def add(self, ctx, word: str):
+        """Executes the add command."""
         guild_id = str(ctx.guild.id)
         if len(await self.get_blacklisted_words(guild_id)) >= 30:
             await ctx.reply("The blacklist is full. Maximum 30 words allowed.")
@@ -251,6 +252,7 @@ class Blacklist(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.has_permissions(administrator=True)
     async def remove(self, ctx, word: str):
+        """Executes the remove command."""
         guild_id = str(ctx.guild.id)
         if not await self.is_word_blacklisted(guild_id, word.lower()):
             await ctx.reply(view=CV2(f"{CROSS} Error", f"`{word}` is not in the blacklist."))
@@ -265,6 +267,7 @@ class Blacklist(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.has_permissions(administrator=True)
     async def reset(self, ctx):
+        """Executes the reset command."""
         guild_id = str(ctx.guild.id)
         words = await self.get_blacklisted_words(guild_id)
 
@@ -283,6 +286,7 @@ class Blacklist(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.has_permissions(administrator=True)
     async def config(self, ctx):
+        """Executes the config command."""
         guild_id = str(ctx.guild.id)
         words = await self.get_blacklisted_words(guild_id)
         if not words:
@@ -297,6 +301,7 @@ class Blacklist(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.has_permissions(administrator=True)
     async def bypass(self, ctx):
+        """Executes the bypass command."""
         await ctx.send(view=CV2("Bypass User Commands", "➜ `blacklistword bypass add <role>/<user>` - Add a role/user to the bypass list.\n\n➜ `blacklistword bypass remove <role>/<user>` - Remove a role/user from the bypass list.\n\n➜ `blacklistword bypass list` - Show the list of bypassed roles/users."))
 
 
@@ -306,6 +311,7 @@ class Blacklist(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.has_permissions(administrator=True)
     async def bypass_add(self, ctx, target: Union[discord.Member, discord.Role]):
+        """Executes the bypass add command."""
         guild_id = str(ctx.guild.id)
         if isinstance(target, discord.Member):
             if len(await self.get_bypassed_users(guild_id)) >= 30:
@@ -335,6 +341,7 @@ class Blacklist(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.has_permissions(administrator=True)
     async def bypass_remove(self, ctx, target: Union[discord.Member, discord.Role]):
+        """Executes the bypass remove command."""
         guild_id = str(ctx.guild.id)
         if isinstance(target, discord.Member):
             if not await self.is_user_bypassed(guild_id, target.id):
@@ -356,6 +363,7 @@ class Blacklist(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.has_permissions(administrator=True)
     async def bypass_list(self, ctx):
+        """Executes the bypass list command."""
         guild_id = str(ctx.guild.id)
         users = await self.get_bypassed_users(guild_id)
         roles = await self.get_bypassed_roles(guild_id)

@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -44,7 +41,6 @@ class TypeRacer:
     """
     TypeRace Game
     """
-
     SENTENCE_URL: ClassVar[str] = "https://api.quotable.io/random"
     EMOJI_MAP: ClassVar[dict[int, str]] = {
         1: "🥇",
@@ -82,7 +78,6 @@ class TypeRacer:
     ) -> discord.Message:
 
         self.embed.description = ""
-
         text = text.lower().replace("\n", " ")
         winners = []
         start = time.perf_counter()

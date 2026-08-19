@@ -4,16 +4,13 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 from discord.ext import commands
 from utils.Tools import blacklist_check, ignore_check
 from collections import defaultdict
@@ -45,6 +42,7 @@ class Media(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        """Executes the on ready command."""
         await self.set_db()
 
     @commands.hybrid_group(name="media", help="Setup Media channel, Media channel will not allow users to send messages other than media files.", invoke_without_command=True)
@@ -180,6 +178,7 @@ class Media(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        """Executes the on message command."""
         if message.author.bot:
             return
 
@@ -228,7 +227,7 @@ class Media(commands.Cog):
 
                     desc = (
                         "⚠️ You are blacklisted from using my commands due to spamming in the media channel. "
-                        "If you believe this is a mistake, please reach out to the support server with proof."
+                        "If you believe this is a mistake, please reach out to our developers with proof."
                     )
                     await message.channel.send(f"{message.author.mention}", view=CV2("You Have Been Blacklisted", desc))
                     del self.infractions[message.author.id]

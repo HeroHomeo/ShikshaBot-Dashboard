@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -199,7 +196,6 @@ class BattleShip:
     """
     BattleShip Game
     """
-
     inputpat: ClassVar[re.Pattern] = re.compile(r"([a-j])(10|[1-9])")
 
     def __init__(
@@ -374,7 +370,6 @@ class BattleShip:
         tuple[discord.Message, discord.Message]
             returns both player's messages respectively
         """
-
         await ctx.send("**Game Started!**\nI've setup the boards in your dms!")
 
         if not self.random:

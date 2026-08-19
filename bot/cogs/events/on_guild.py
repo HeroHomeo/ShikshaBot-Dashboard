@@ -4,16 +4,13 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 from discord.ext import commands
-from core import zyrox, Cog
+from core import shikshabot, Cog
 import discord
 from utils.emoji import ARROWRED, KING, ZBOT, ZHUMAN, ZROCKET
 import logging
@@ -26,11 +23,11 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 
-client = zyrox()
+client = shikshabot()
 
 
 class Guild(Cog):
-    def __init__(self, client: zyrox):
+    def __init__(self, client: shikshabot):
         self.client = client
         self.recently_removed_guilds = set()
         self._removal_timestamps = {}
@@ -38,6 +35,7 @@ class Guild(Cog):
     @client.event
     @commands.Cog.listener(name="on_guild_join")
     async def on_guild_add(self, guild):
+        """Executes the on guild add command."""
         try:
             rope = [
                 inv
@@ -100,7 +98,7 @@ Threads : {len(guild.threads)}
                 await guild.chunk()
 
             embed = discord.Embed(
-                description=f"{ARROWRED} Prefix For This Server is `>`\n{ARROWRED} Get Started with `>help`\n{ARROWRED} For detailed guides, FAQ & information, visit our **[Support Server](https://discord.gg/codexdev)**",
+                description=f"{ARROWRED} Prefix For This Server is `>`\n{ARROWRED} Get Started with `>help`",
                 color=0xFF0000,
             )
             embed.set_author(
@@ -112,11 +110,18 @@ Threads : {len(guild.threads)}
             if guild.icon:
                 embed.set_thumbnail(url=guild.icon.url)
 
+            async def support_callback(interaction: discord.Interaction):
+                await interaction.response.send_message(
+                    "If you really want to support me, then send some real dough! 💸",
+                    file=discord.File('assets/qr_code.png'),
+                    ephemeral=True
+                )
+
             support = Button(
                 label="Support",
-                style=discord.ButtonStyle.link,
-                url=f"https://discord.gg/codexdev",
+                style=discord.ButtonStyle.success,
             )
+            support.callback = support_callback
 
             view = View()
             view.add_item(support)
@@ -143,6 +148,7 @@ Threads : {len(guild.threads)}
     @client.event
     @commands.Cog.listener(name="on_guild_remove")
     async def on_guild_remove(self, guild):
+        """Executes the on guild remove command."""
         import time
 
         current_time = time.time()

@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -30,7 +27,7 @@ from typing import *
 from utils import *
 from utils.config import BotName, serverLink
 from utils import Paginator, DescriptionEmbedPaginator, FieldPagePaginator, TextPaginator
-from core import Cog, zyrox, Context
+from core import Cog, shikshabot, Context
 from typing import Optional
 import aiosqlite 
 import asyncio
@@ -130,6 +127,8 @@ class Extra(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def banner(self, ctx):
+    """
+Executes the banner command."""
     if ctx.invoked_subcommand is None:
       await ctx.send_help(ctx.command)
 
@@ -139,6 +138,8 @@ class Extra(commands.Cog):
   @commands.cooldown(1, 3, commands.BucketType.user)
   @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
   async def server(self, ctx):
+    """
+Executes the banner server command."""
     if not ctx.guild.banner:
       await ctx.reply(view=CV2(f"{cross} Error", "This server doesn't have a banner."))
     else:
@@ -170,6 +171,8 @@ class Extra(commands.Cog):
                   ctx,
                   member: Optional[Union[discord.Member,
                                          discord.User]] = None):
+    """
+Executes the banner user command."""
     if member == None or member == "":
       member = ctx.author
     bannerUser = await self.bot.fetch_user(member.id)
@@ -225,6 +228,8 @@ class Extra(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def serverinfo(self, ctx):
+        """
+Executes the serverinfo command."""
         c_at = ctx.guild.created_at.strftime("%Y-%m-%d %H:%M:%S")
         about = (
             f"**Name:** {ctx.guild.name}\n"
@@ -288,6 +293,8 @@ class Extra(commands.Cog):
                       ctx,
                       member: Optional[Union[discord.Member,
                                              discord.User]] = None):
+    """
+Executes the userinfo command."""
     if member == None or member == "":
       member = ctx.author
     elif member not in ctx.guild.members:
@@ -377,8 +384,7 @@ class Extra(commands.Cog):
     embed.set_thumbnail(
       url=member.avatar.url if member.avatar else member.default_avatar.url)
     embed.add_field(name="__General Information__",
-                    value=f"""
-**Name:** {member}
+                    value=f"""**Name:** {member}
 **ID:** {member.id}
 **Nickname:** {nickk}
 **Bot?:** {'{TICK}> Yes' if member.bot else '{CROSS} No'}
@@ -391,8 +397,7 @@ class Extra(commands.Cog):
       r = (', '.join(role.mention for role in member.roles[1:][::-1])
            if len(member.roles) > 1 else 'None.')
       embed.add_field(name="__Role Info__",
-                      value=f"""
-**Highest Role:** {member.top_role.mention if len(member.roles) > 1 else 'None'}
+                      value=f"""**Highest Role:** {member.top_role.mention if len(member.roles) > 1 else 'None'}
 **Roles [{f'{len(member.roles) - 1}' if member.roles else '0'}]:** {r if len(r) <= 1024 else r[0:1006] + ' and more...'}
 **Color:** {member.color if member.color else '99aab5'}
                 """,
@@ -456,6 +461,7 @@ class Extra(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def boosts(self, ctx):
+    """Executes the boosts command."""
     await ctx.send(view=CV2(f"{BOOST} Boosts Count Of {ctx.guild.name}", f"**Total `{ctx.guild.premium_subscription_count}` boosts**"))
 
   @commands.hybrid_group(name="list",
@@ -465,6 +471,7 @@ class Extra(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def __list_(self, ctx: commands.Context):
+    """Executes the   list  command."""
     if ctx.subcommand_passed is None:
       await ctx.send_help(ctx.command)
       ctx.command.reset_cooldown(ctx)
@@ -478,6 +485,7 @@ class Extra(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def list_boost(self, ctx):
+    """Executes the list boost command."""
     guild = ctx.guild
     entries = [
       f"`#{no}.` [{mem}](https://discord.com/users/{mem.id}) [{mem.mention}] - <t:{round(mem.premium_since.timestamp())}:R>"
@@ -528,6 +536,7 @@ class Extra(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def list_inrole(self, ctx, role: discord.Role):
+    """Executes the list inrole command."""
     guild = ctx.guild
     entries = [
       f"`#{no}.` [{mem}](https://discord.com/users/{mem.id}) [{mem.mention}] - <t:{int(mem.created_at.timestamp())}:D>"
@@ -549,6 +558,7 @@ class Extra(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def list_emojis(self, ctx):
+    """Executes the list emojis command."""
     guild = ctx.guild
     entries = [
       f"`#{no}.` {e} - `{e}`"
@@ -571,6 +581,7 @@ class Extra(commands.Cog):
   @commands.cooldown(1, 3, commands.BucketType.user)
   @commands.has_permissions(manage_roles=True)
   async def list_roles(self, ctx):
+    """Executes the list roles command."""
     guild = ctx.guild
     entries = [
       f"`#{no}.` {e.mention} - `[{e.id}]`"
@@ -592,6 +603,7 @@ class Extra(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def list_bots(self, ctx):
+    """Executes the list bots command."""
     guild = ctx.guild
     people = filter(lambda member: member.bot, ctx.guild.members)
     people = sorted(people, key=lambda member: member.joined_at)
@@ -615,6 +627,7 @@ class Extra(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def list_admin(self, ctx):
+    """Executes the list admin command."""
     mems = ([
       mem for mem in ctx.guild.members
       if mem.guild_permissions.administrator
@@ -721,6 +734,7 @@ class Extra(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def list_activedeveloper(self, ctx):
+    """Executes the list activedeveloper command."""
     mems = ([
       memb for memb in ctx.guild.members
       if memb.public_flags.active_developer
@@ -796,6 +810,7 @@ class Extra(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def joined_at(self, ctx):
+    """Executes the joined at command."""
     joined = ctx.author.joined_at.strftime("%a, %d %b %Y %I:%M %p")
     await ctx.send(view=CV2("joined-at", f"**`{joined}`**"))
 
@@ -804,6 +819,8 @@ class Extra(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def github(self, ctx, *, search_query):
+    """
+Executes the github command."""
     json = requests.get(
       f"https://api.github.com/search/repositories?q={search_query}").json()
 
@@ -822,6 +839,7 @@ class Extra(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def vcinfo(self, ctx, channel: discord.VoiceChannel = None):
+    """Executes the vcinfo command."""
     if channel is None:
       await ctx.reply(view=CV2(f"{cross} Error", "Please provide a valid voice channel."))
       return
@@ -855,6 +873,7 @@ class Extra(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def channelinfo(self, ctx, channel: discord.TextChannel = None):
+    """Executes the channelinfo command."""
     if channel is None:
       channel = ctx.channel
       
@@ -875,7 +894,8 @@ class Extra(commands.Cog):
   @blacklist_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def ping(self, ctx: commands.Context):
-    """Shows the bot's WebSocket, API, and Database latencies."""
+    """
+Shows the bot's WebSocket, API, and Database latencies."""
     
     # 1. Start timer and send an initial "Pinging..." message
     start_time = time.monotonic()
@@ -914,6 +934,7 @@ class Extra(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def keyperms(self, ctx, member: discord.Member):
+    """Executes the keyperms command."""
     key_permissions = []
 
     if member.guild_permissions.create_instant_invite:
@@ -979,6 +1000,7 @@ class Extra(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 30, commands.BucketType.channel)
   async def report(self, ctx, *, bug):
+    """Executes the report command."""
     channel = self.bot.get_channel(1396813063642153030)
     report_text = f"{bug}\n\n**Reported By:** {ctx.author.name}\n**Server:** {ctx.guild.name}\n**Channel:** {ctx.channel.name}"
     await channel.send(view=CV2("Bug Reported", report_text))

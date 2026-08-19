@@ -4,18 +4,15 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
 from discord.ext import commands
 import os
-from core import Cog, zyrox, Context
+from core import Cog, shikshabot, Context
 import games as games
 from utils.Tools import *
 from utils.cv2 import CV2
@@ -26,9 +23,9 @@ import asyncio
 
 
 class Games(Cog):
-    """Zyrox Games"""
-
-    def __init__(self, client: zyrox):
+    """
+ShikshaBot Games"""
+    def __init__(self, client: shikshabot):
         self.client = client
 
 
@@ -41,6 +38,7 @@ class Games(Cog):
     @commands.max_concurrency(5, per=commands.BucketType.default, wait=False)
     @commands.guild_only()
     async def _chess(self, ctx: Context, player: discord.Member):
+        """Executes the  chess command."""
         if player == ctx.author:
             await ctx.send(view=CV2("❌ Error", "You Cannot play game with yourself!"))
         elif player.bot:
@@ -60,6 +58,7 @@ class Games(Cog):
     @commands.max_concurrency(5, per=commands.BucketType.default, wait=False)
     @commands.guild_only()
     async def _rps(self, ctx: Context, player: discord.Member = None):
+        """Executes the  rps command."""
         game = btn.BetaRockPaperScissors(player)
         await game.start(ctx, timeout=120)
 
@@ -73,6 +72,7 @@ class Games(Cog):
     @commands.max_concurrency(5, per=commands.BucketType.user, wait=False)
     @commands.guild_only()
     async def _ttt(self, ctx: Context, player: discord.Member):
+        """Executes the  ttt command."""
         if player == ctx.author:
             await ctx.send(view=CV2("❌ Error", "You cannot play game with yourself!"))
         elif player.bot:
@@ -90,6 +90,7 @@ class Games(Cog):
     @commands.max_concurrency(3, per=commands.BucketType.default, wait=False)
     @commands.guild_only()
     async def _wordle(self, ctx: Context):
+        """Executes the  wordle command."""
         game = games.Wordle()
         await game.start(ctx, timeout=120)
 
@@ -103,6 +104,7 @@ class Games(Cog):
     @commands.max_concurrency(3, per=commands.BucketType.default, wait=False)
     @commands.guild_only()
     async def _2048(self, ctx: Context):
+        """Executes the  2048 command."""
         game = btn.BetaTwenty48()
         await game.start(ctx, win_at=2048)
 
@@ -116,6 +118,7 @@ class Games(Cog):
     @commands.max_concurrency(3, per=commands.BucketType.default, wait=False)
     @commands.guild_only()
     async def _memory(self, ctx: Context):
+        """Executes the  memory command."""
         game = btn.MemoryGame()
         await game.start(ctx)
 
@@ -129,6 +132,7 @@ class Games(Cog):
     @commands.max_concurrency(3, per=commands.BucketType.default, wait=False)
     @commands.guild_only()
     async def _number_slider(self, ctx: Context):
+        """Executes the  number slider command."""
         game = btn.NumberSlider()
         await game.start(ctx)
 
@@ -142,6 +146,7 @@ class Games(Cog):
     @commands.max_concurrency(3, per=commands.BucketType.default, wait=False)
     @commands.guild_only()
     async def _battle(self, ctx: Context, player: discord.Member):
+        """Executes the  battle command."""
         game = btn.BetaBattleShip(player1=ctx.author, player2=player)
         await game.start(ctx)
 
@@ -151,6 +156,7 @@ class Games(Cog):
                     usage="country-guesser")
     @commands.guild_only()
     async def _country_guesser(self, ctx: Context):
+        """Executes the  country guesser command."""
         if ctx.invoked_subcommand is None:
             await ctx.send_help("country-guesser")
 
@@ -164,7 +170,6 @@ class Games(Cog):
                               help="Ends the country guesser game.")
     async def _end_country_guesser(self, ctx: Context):
         await self.country_guesser_game.end_game_manually(ctx)"""
-
     @commands.hybrid_command(name="connectfour",
                              help="Play Connect Four game with user.",
                              aliases=["c4", "connect-four", "connect4"],
@@ -175,6 +180,7 @@ class Games(Cog):
     @commands.max_concurrency(1, per=commands.BucketType.user, wait=False)
     @commands.guild_only()
     async def _connectfour(self, ctx: Context, player: discord.Member):
+        """Executes the  connectfour command."""
         if player == ctx.author:
             await ctx.send(view=CV2("❌ Error", "You cannot play against yourself!"))
         elif player.bot:
@@ -195,5 +201,6 @@ class Games(Cog):
     @commands.max_concurrency(3, per=commands.BucketType.default, wait=False)
     @commands.guild_only()
     async def _lights_show(self, ctx: Context):
+        """Executes the  lights show command."""
         game = btn.LightsOut()
         await game.start(ctx)

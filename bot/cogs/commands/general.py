@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -33,7 +30,7 @@ from discord.ui import Button, View, LayoutView, TextDisplay, Separator, MediaGa
 import psutil
 import time
 from datetime import datetime, timezone, timedelta
-import sqlite3
+from db import sqlite3_mock as sqlite3
 from typing import *
 import string
 from utils.cv2 import CV2, build_container
@@ -113,6 +110,7 @@ class General(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def _user(self, ctx, member: Optional[Union[discord.Member, discord.User]] = None):
+    """Executes the  user command."""
     try:
       if member is None:
         member = ctx.author
@@ -150,6 +148,7 @@ class General(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def servericon(self, ctx: commands.Context):
+    """Executes the servericon command."""
     server = ctx.guild
     if server.icon is None:
       await ctx.reply(view=CV2("❌ Error", "This server does not have an icon."))
@@ -186,6 +185,7 @@ class General(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 2, commands.BucketType.user)
   async def membercount(self, ctx: commands.Context):
+        """Executes the membercount command."""
         total_members = len(ctx.guild.members)
         total_humans = len([m for m in ctx.guild.members if not m.bot])
         total_bots = len([m for m in ctx.guild.members if m.bot])
@@ -208,6 +208,8 @@ class General(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def poll(self, ctx: commands.Context, *, message):
+    """
+Executes the poll command."""
     author = ctx.author
     msg = await ctx.send(view=CV2(f"**Poll raised by {author}!**", message))
     await msg.add_reaction(TICK)
@@ -221,6 +223,7 @@ class General(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def hack(self, ctx: commands.Context, member: discord.Member):
+    """Executes the hack command."""
     stringi = member.name
     min_length = 2
     max_length = 12
@@ -251,6 +254,8 @@ class General(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 2, commands.BucketType.user)
   async def token(self, ctx: commands.Context, user: discord.Member = None):
+    """
+Executes the token command."""
     list = [
       "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
       "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "_"
@@ -279,6 +284,8 @@ class General(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def wizz(self, ctx: commands.Context):
+    """
+Executes the wizz command."""
     message6 = await ctx.send(
       f"`Wizzing {ctx.guild.name}, will take 22 seconds to complete`")
     message7 = await ctx.send(f"Changing all guild settings...")
@@ -311,6 +318,7 @@ class General(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def urban(self, ctx: commands.Context, *, phrase):
+    """Executes the urban command."""
     async with self.aiohttp.get(
         "http://api.urbandictionary.com/v0/define?term={}".format(
           phrase)) as urb:
@@ -341,6 +349,7 @@ class General(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def rickroll(self, ctx: commands.Context, *, url: str):
+    """Executes the rickroll command."""
     if not re.match(self._URL_REGEX, url):
       raise BadArgument("Invalid URL")
 
@@ -360,6 +369,7 @@ class General(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def hash(self, ctx: commands.Context, algorithm: str, *, message):
+    """Executes the hash command."""
     algos: dict[str, str] = {
       "md5": hashlib.md5(bytes(message.encode("utf-8"))).hexdigest(),
       "sha1": hashlib.sha1(bytes(message.encode("utf-8"))).hexdigest(),
@@ -389,10 +399,10 @@ class General(commands.Cog):
   @ignore_check()
   @commands.cooldown(1, 3, commands.BucketType.user)
   async def invite(self, ctx: commands.Context):
+      """Executes the invite command."""
       invite_text = (
           "```Empower your server with blazing-fast features and 24/7 support!```\n"
           f"{ZYROXLINKS} **Quick Actions**\n"
-          f">>> **[Invite {BotName}](https://discord.com/oauth2/authorize?client_id=1396114795102470196&permissions=8&integration_type=0&scope=bot+applications.commands)**\n"
-          "**[Support Server](https://discord.gg/codexdev)**"
+          f">>> **[Invite {BotName}](https://discord.com/oauth2/authorize?client_id=1537797127734952058&permissions=0&integration_type=0&scope=bot+applications.commands)**\n"
       )
       await ctx.send(view=CV2(f"{ZYROXCONNECTION} {BotName} Integration Hub!", invite_text))

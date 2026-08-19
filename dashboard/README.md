@@ -9,7 +9,7 @@
 ╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝
 ```
 
-<h3>ZyroX Dashboard — Next.js Web Interface</h3>
+<h3>ShikshaBot Dashboard — Next.js Web Interface</h3>
 
 <a href="https://nexiohost.in"><img src="https://img.shields.io/badge/⭐%20PREMIUM%20HOSTING-NexioHost-FFD700?style=for-the-badge&labelColor=1a1a2e&color=FFD700&logoColor=FFD700"/></a>
 
@@ -20,9 +20,9 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-red?style=for-the-badge"/></a>
 </p>
 <p>
-  <a href="https://discord.gg/codexdev"><img src="https://img.shields.io/badge/Discord-Join_Server-5865F2?style=for-the-badge&logo=discord&logoColor=white"/></a>
-  <a href="https://youtube.com/@CodeXDevs"><img src="https://img.shields.io/badge/YouTube-CodeXDevs-FF0000?style=for-the-badge&logo=youtube&logoColor=white"/></a>
-  <a href="https://github.com/RayExo"><img src="https://img.shields.io/badge/GitHub-RayExo-181717?style=for-the-badge&logo=github&logoColor=white"/></a>
+  <a href="https://discord.gg/invite"><img src="https://img.shields.io/badge/Discord-Join_Server-5865F2?style=for-the-badge&logo=discord&logoColor=white"/></a>
+  <a href="https://youtube.com/@Avinash aka shroud.bean"><img src="https://img.shields.io/badge/YouTube-Avinash aka shroud.bean-FF0000?style=for-the-badge&logo=youtube&logoColor=white"/></a>
+  <a href="https://github.com/Avinash"><img src="https://img.shields.io/badge/GitHub-Avinash-181717?style=for-the-badge&logo=github&logoColor=white"/></a>
 </p>
 
 </div>
@@ -31,7 +31,7 @@
 
 ## ✦ Overview
 
-This folder contains the ZyroX web dashboard built with `Next.js 14` (App Router), `TypeScript`, and `Tailwind CSS`. It connects to the bot's FastAPI backend via a permanent Cloudflare Tunnel HTTPS URL and lets server admins manage all bot settings through a sleek, branded UI.
+This folder contains the ShikshaBot web dashboard built with `Next.js 14` (App Router), `TypeScript`, and `Tailwind CSS`. It connects to the bot's FastAPI backend via a permanent Cloudflare Tunnel HTTPS URL and lets server admins manage all bot settings through a sleek, branded UI.
 
 ```
 dashboard/
@@ -78,7 +78,7 @@ dashboard/
 | Requirement | Notes |
 |---|---|
 | Node.js 18+ | — |
-| ZyroX bot running | with `API_ENABLED=true` and `TUNNEL_ENABLED=true` |
+| ShikshaBot bot running | with `API_ENABLED=true` and `TUNNEL_ENABLED=true` |
 | Discord OAuth app | from [Discord Developer Portal](https://discord.com/developers/applications) |
 
 ---
@@ -111,7 +111,7 @@ DISCORD_CLIENT_SECRET         = your_discord_oauth_client_secret
 
 # ── Branding ──────────────────────────────────────────────────────
 NEXT_PUBLIC_ADMIN_IDS         = your_discord_user_id
-NEXT_PUBLIC_BRAND_NAME        = "ZyroX"
+NEXT_PUBLIC_BRAND_NAME        = "ShikshaBot"
 NEXT_PUBLIC_BRAND_NAME_WORD   = "ZX"
 ```
 
@@ -208,19 +208,19 @@ This URL is permanent — it never changes between restarts as long as the Cloud
 
 <div align="center">
 
-## ✦ CodeX Devs
+## ✦ ShikshaBot Devs
 
 *Built for protection. Designed for style.*
 
-<a href="https://discord.gg/codexdev"><img src="https://discord.com/api/guilds/1301573144817045524/widget.png?style=banner2" alt="CodeX Development Discord Server" width="480"/></a>
+<a href="https://discord.gg/invite"><img src="https://discord.com/api/guilds/1301573144817045524/widget.png?style=banner2" alt="ShikshaBot Development Discord Server" width="480"/></a>
 
 <p>
-  <a href="https://discord.gg/codexdev"><img src="https://img.shields.io/badge/Discord-Join_Server-5865F2?style=for-the-badge&logo=discord&logoColor=white"/></a>
-  <a href="https://youtube.com/@CodeXDevs"><img src="https://img.shields.io/badge/YouTube-CodeXDevs-FF0000?style=for-the-badge&logo=youtube&logoColor=white"/></a>
-  <a href="https://github.com/RayExo"><img src="https://img.shields.io/badge/GitHub-RayExo-181717?style=for-the-badge&logo=github&logoColor=white"/></a>
+  <a href="https://discord.gg/invite"><img src="https://img.shields.io/badge/Discord-Join_Server-5865F2?style=for-the-badge&logo=discord&logoColor=white"/></a>
+  <a href="https://youtube.com/@Avinash aka shroud.bean"><img src="https://img.shields.io/badge/YouTube-Avinash aka shroud.bean-FF0000?style=for-the-badge&logo=youtube&logoColor=white"/></a>
+  <a href="https://github.com/Avinash"><img src="https://img.shields.io/badge/GitHub-Avinash-181717?style=for-the-badge&logo=github&logoColor=white"/></a>
   <a href="https://nexiohost.in"><img src="https://img.shields.io/badge/⭐%20PREMIUM%20HOSTING-NexioHost-FFD700?style=for-the-badge&labelColor=1a1a2e&color=FFD700&logoColor=FFD700"/></a>
 </p>
 
-© 2026 CodeX Devs — MIT License
+© 2026 ShikshaBot Devs — MIT License
 
 </div>

@@ -10,7 +10,7 @@ class Mention(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.color = 0xFF0000
-        self.bot_name = "Zyrox X"
+        self.bot_name = "ShikshaBot X"
 
     async def is_blacklisted(self, message):
         async with aiosqlite.connect("db/block.db") as db:
@@ -53,11 +53,11 @@ class Mention(commands.Cog):
                     description=f"> {HEART3} **Hey {message.author.mention}**\n> {ARROWRED} **Prefix For This Server `{prefix}`**\n\n___Type `{prefix}help` for more information.___"
                 )
                 embed.set_thumbnail(url=self.bot.user.avatar.url)
-                embed.set_footer(text="Powered by Zyrox Development™", icon_url=self.bot.user.avatar.url)
+                embed.set_footer(text="Powered by ShikshaBot Development™", icon_url=self.bot.user.avatar.url)
 
                 buttons = [
                     discord.ui.Button(label="Invite", style=discord.ButtonStyle.link, url="https://discord.com/oauth2/authorize?client_id=1396114795102470196&permissions=8&integration_type=0&scope=bot+applications.commands"),
-                    discord.ui.Button(label="Support", style=discord.ButtonStyle.link, url="https://discord.gg/codexdev"),
+                    discord.ui.Button(label="Support", style=discord.ButtonStyle.link, url="https://discord.gg/invite"),
                 ]
 
                 view = discord.ui.View()

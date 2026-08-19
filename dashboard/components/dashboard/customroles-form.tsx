@@ -5,12 +5,9 @@
  * ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
  * ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
  * ║                                                                  ║
- * ║           © 2026 CodeX Devs — All Rights Reserved               ║
+ * ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
  * ║                                                                  ║
- * ║   discord  ──  https://discord.gg/codexdev                      ║
- * ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
- * ║   github   ──  https://github.com/RayExo                        ║
- * ║                                                                  ║
+    * ║                                                                  ║
  * ╚══════════════════════════════════════════════════════════════════╝
  */
 
@@ -156,7 +153,7 @@ export function CustomRolesForm({ initialConfig, roles, guildId }: CustomRolesFo
              <li>• <code>.staff @user</code> - Assigns/Removes Staff role</li>
              <li>• <code>.girl @user</code> - Assigns/Removes Girl role</li>
              <li>• <code>.vip @user</code> - Assigns/Removes VIP role</li>
-             <li>• Ensure Zyrox is placed higher than these roles in server settings!</li>
+             <li>• Ensure ShikshaBot is placed higher than these roles in server settings!</li>
           </ul>
         </div>
       </div>

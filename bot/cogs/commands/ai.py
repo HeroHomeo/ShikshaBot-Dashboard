@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -41,7 +38,8 @@ logger .setLevel (logging .WARNING )
 
 
 class CV2View(LayoutView):
-    """Reusable Component v2 view — pass a title and any number of text sections."""
+    """
+Reusable Component v2 view — pass a title and any number of text sections."""
     def __init__(self, title, *sections):
         super().__init__(timeout=None)
         items = [TextDisplay(f"**{title}**")]
@@ -174,7 +172,8 @@ class PersonalityModal (discord .ui .Modal ,title ="Set Your AI Personality"):
         self .ai_cog =ai_cog 
 
 
-        default_prompt ="""You are {BRAND_NAME}, an intelligent and caring Discord bot assistant created by . Evil ! Rexy .! 💕
+        default_prompt ="""
+You are {BRAND_NAME}, an intelligent and caring Discord bot assistant created by Avinash aka shroud.bean! 💕
 
 CORE PERSONALITY:
 - Intelligent, helpful, and genuinely caring about users
@@ -216,7 +215,6 @@ SAFETY GUIDELINES:
 - Promote healthy Discord interactions
 
 Ready to have meaningful conversations and help with anything you need! 💖"""
-
 
         display_text =current_personality if current_personality .strip ()else default_prompt 
 
@@ -303,7 +301,8 @@ class AI (commands .Cog ):
         asyncio .create_task (self ._delayed_init ())
 
     async def cog_load (self ):
-        """Initialize cog without blocking operations"""
+        """
+Initialize cog without blocking operations"""
         try :
             pass 
         except Exception as e :
@@ -311,7 +310,8 @@ class AI (commands .Cog ):
 
     @commands .group (name ="ai",invoke_without_command =True ,description ="AI chatbot and utility commands")
     async def ai (self ,ctx ):
-        """AI chatbot and utility commands"""
+        """
+AI chatbot and utility commands"""
         if ctx .invoked_subcommand is None :
             await ctx .send_help (ctx .command )
 
@@ -390,7 +390,8 @@ class AI (commands .Cog ):
             logger .error (f"Error creating database tables: {e}")
 
     async def _delayed_init (self ):
-        """Initialize database and load data after bot is ready"""
+        """
+Initialize database and load data after bot is ready"""
         await self .bot .wait_until_ready ()
         await self ._create_tables ()
         await self ._load_data ()
@@ -427,6 +428,7 @@ class AI (commands .Cog ):
 
     @commands .Cog .listener ()
     async def on_message (self ,message :discord .Message ):
+        """Executes the on message command."""
         if message .author .bot or not message .guild :
             return 
 
@@ -436,7 +438,14 @@ class AI (commands .Cog ):
 
         if self .chatbot_enabled .get (guild_id ,False )and self .chatbot_channels .get (guild_id )==channel_id :
             content =message .content .strip ()
-            if not content :
+            image_bytes = None
+            if message.attachments:
+                for att in message.attachments:
+                    if att.content_type and att.content_type.startswith('image/'):
+                        image_bytes = await att.read()
+                        break
+
+            if not content and not image_bytes:
                 return 
 
             user_id =message .author .id 
@@ -445,13 +454,10 @@ class AI (commands .Cog ):
             await self ._cleanup_old_conversations ()
 
 
-            await self ._store_conversation_message (user_id ,guild_id ,"user",content )
-
-
             history =await self ._get_conversation_history (user_id ,guild_id ,limit =30 )
 
             async with message .channel .typing ():
-                response =await self ._get_response (content ,history ,guild_id ,user_id )
+                response =await self ._get_response (content ,history ,guild_id ,user_id, image_bytes )
                 await message .reply (
                 response ,
                 mention_author =True ,
@@ -459,6 +465,7 @@ class AI (commands .Cog ):
                 )
 
 
+                await self ._store_conversation_message (user_id ,guild_id ,"user",content if content else "[Sent an image]")
                 await self ._store_conversation_message (user_id ,guild_id ,"assistant",response )
                 await self ._save_chat_history (message .author .id ,guild_id ,content ,response )
 
@@ -512,7 +519,7 @@ class AI (commands .Cog ):
                 return "Gemini API key not configured. Please set the GOOGLE_API_KEY environment variable."
 
             genai .configure (api_key =self .gemini_api_key )
-            model =genai .GenerativeModel ("gemini-1.5-pro")
+            model =genai .GenerativeModel ("gemini-flash-lite-latest")
             chat =model .start_chat (history =history )
             response =await asyncio .to_thread (chat .send_message ,message )
             return response .text .strip ()
@@ -520,62 +527,64 @@ class AI (commands .Cog ):
             logger .error (f"Gemini AI error: {e}")
             return f"Sorry, I encountered an error while processing your request: {str(e)}"
 
-    async def _get_groq_response (self ,message :str ,context_messages :list )->str :
-        """Get a response from Groq AI with full context."""
-        try :
-            if not self .groq_api_key :
-                return "Groq API key not configured. Please set the GROQ_API_KEY environment variable."
+    async def _get_groq_response(self, message: str, context_messages: list) -> str:
+        """
+        Get a response from Gemini AI (replacing Groq) with full context.
+        """
+        try:
+            if not self.gemini_api_key:
+                return "Gemini API key not configured. Please set the GOOGLE_API_KEY environment variable."
 
-            url ="https://api.groq.com/openai/v1/chat/completions"
-            headers ={
-            "Authorization":f"Bearer {self.groq_api_key}",
-            "Content-Type":"application/json"
-            }
+            genai.configure(api_key=self.gemini_api_key)
+            
+            # Extract system instructions
+            system_instruction = "\n".join([msg.get("content", "") for msg in context_messages if msg.get("role") == "system"])
+            
+            # Format history for Gemini (excluding system messages and the final message)
+            gemini_history = []
+            
+            # Skip the last message if it's the current prompt, as we send it directly
+            history_msgs = context_messages[:-1] if context_messages and context_messages[-1].get("content") == message else context_messages
+            
+            for msg in history_msgs:
+                role = msg.get("role")
+                if role == "system":
+                    continue
+                    
+                gemini_role = "user" if role == "user" else "model"
+                content = msg.get("content", "")
+                
+                if not content:
+                    continue
+                    
+                gemini_history.append({
+                    "role": gemini_role,
+                    "parts": [content]
+                })
 
-
-            api_messages =[]
-            for msg in context_messages :
-
-                if isinstance (msg ,dict ):
-                    if "content"in msg :
-                        api_messages .append ({
-                        "role":msg ["role"],
-                        "content":msg ["content"]
-                        })
-                    elif "parts"in msg and msg ["parts"]:
-
-                        content =msg ["parts"][0 ].get ("text","")if msg ["parts"]else ""
-                        api_messages .append ({
-                        "role":msg ["role"],
-                        "content":content 
-                        })
-
-            data ={
-            "model":"llama-3.3-70b-versatile",
-            "messages":api_messages ,
-            "temperature":0.8 ,
-            "max_tokens":1000 ,
-            "top_p":0.9 
-            }
-
-            async with aiohttp .ClientSession ()as session :
-                async with session .post (url ,headers =headers ,json =data )as response :
-                    if response .status ==200 :
-                        json_response =await response .json ()
-                        return json_response ['choices'][0 ]['message']['content'].strip ()
-                    else :
-                        error_message =await response .text ()
-                        logger .error (f"Groq API error: {response.status} - {error_message}")
-                        return f"Sorry, I encountered an error while processing your request: {response.status} - {error_message}"
-        except Exception as e :
-            logger .error (f"Groq AI error: {e}")
+            model = genai.GenerativeModel("gemini-flash-lite-latest", system_instruction=system_instruction if system_instruction else None)
+            chat = model.start_chat(history=gemini_history)
+            
+            last_msg = context_messages[-1] if context_messages else {}
+            if "image" in last_msg:
+                import PIL.Image
+                import io
+                img = PIL.Image.open(io.BytesIO(last_msg["image"]))
+                prompt_parts = [message, img] if message else [img]
+                response = await asyncio.to_thread(chat.send_message, prompt_parts)
+            else:
+                response = await asyncio.to_thread(chat.send_message, message)
+                
+            return response.text.strip()
+            
+        except Exception as e:
+            logger.error(f"Gemini AI error (via groq wrapper): {e}")
             return f"Sorry, I encountered an error while processing your request: {str(e)}"
 
-    async def _get_response (self ,message :str ,history :list ,guild_id :int ,user_id :int =None )->str :
+    async def _get_response (self ,message :str ,history :list ,guild_id :int ,user_id :int =None, image_bytes: bytes = None )->str :
         try :
 
             user_personality =await self ._get_user_personality (user_id ,guild_id )if user_id else ""
-
 
             system_context =[]
 
@@ -590,19 +599,20 @@ class AI (commands .Cog ):
 
                 system_context .append ({
                 "role":"system",
-                "content":"You are a Discord bot with many features including moderation, entertainment, music, games, AI capabilities, and utilities. Support server: https://discord.gg/codexdev"
+                "content":"You are a Discord bot with many features including moderation, entertainment, music, games, AI capabilities, and utilities. "
                 })
             else :
 
                 system_context .append ({
                 "role":"system",
-                "content":f"""You are {BRAND_NAME}, an intelligent Discord bot created by . Evil ! Rexy .. 
+                "content":f"""
+You are {BRAND_NAME}, an intelligent Discord bot created by Avinash aka shroud.bean. 
 
 You have a caring, helpful personality and can remember conversations with users. You have many features including moderation, entertainment, music, games, AI capabilities, and utilities.
 
 Be natural, conversational, and genuine in your responses. Don't be overly formal or robotic. Use the conversation history to provide personalized responses that feel like talking to a real friend who happens to be very knowledgeable and helpful.
 
-Support server: https://discord.gg/codexdev"""
+"""
                 })
 
 
@@ -613,9 +623,13 @@ Support server: https://discord.gg/codexdev"""
                 })
 
 
-            full_context =system_context +history +[{"role":"user","content":message }]
+            msg_content = message if message else "Please analyze this image."
+            if image_bytes:
+                full_context =system_context +history +[{"role":"user","content":msg_content, "image": image_bytes }]
+            else:
+                full_context =system_context +history +[{"role":"user","content":msg_content }]
 
-            return await self ._get_groq_response (message ,full_context )
+            return await self ._get_groq_response (msg_content ,full_context )
 
         except Exception as e :
             logger .error (f"Error in _get_response: {e}")
@@ -624,13 +638,15 @@ Support server: https://discord.gg/codexdev"""
     @ai .command (name ="analyze",description ="Analyze an image or text and provide a description")
     @app_commands .describe (image ="Image to analyze (optional)",text ="Text to analyze (optional)")
     async def ai_analyze (self ,ctx :commands .Context ,image :discord .Attachment =None ,*,text :str =None ):
-        """Analyze an image or text using AI"""
+        """
+Analyze an image or text using AI"""
         await self .ai_analyse (ctx ,image ,text =text )
 
     @ai .command (name ="analyse",description ="Analyze an image or text and provide a description")
     @app_commands .describe (image_url ="URL of the image to analyse (optional)")
     async def ai_analyse (self ,ctx :commands .Context ,image_url :str =None ):
-        """Analyse an image using AI vision or text content and provide a detailed description"""
+        """
+Analyse an image using AI vision or text content and provide a detailed description"""
         await ctx .defer ()
 
 
@@ -682,13 +698,14 @@ Support server: https://discord.gg/codexdev"""
         await ctx .send (view=view)
 
     async def analyze_image (self ,ctx ,image_url :str ):
-        """Analyze an image using the Gemini Vision API and return CV2View"""
+        """
+Analyze an image using the Gemini Vision API and return CV2View"""
         try :
             if not self .gemini_api_key :
                 return CV2View("🖼️ Image Analysis", "Gemini API key not configured.")
 
             genai .configure (api_key =self .gemini_api_key )
-            model =genai .GenerativeModel ('gemini-1.5-pro')
+            model =genai .GenerativeModel ('gemini-flash-lite-latest')
 
             async with aiohttp .ClientSession ()as session :
                 async with session .get (image_url )as resp :
@@ -713,7 +730,8 @@ Support server: https://discord.gg/codexdev"""
     @ai .command (name ="code",description ="Generate code in any programming language")
     @app_commands .describe (language ="Programming language",description ="Description of what the code should do")
     async def ai_code (self ,ctx :commands .Context ,language :str ,*,description :str ):
-        """Generate code using AI"""
+        """
+Generate code using AI"""
         await ctx .defer ()
 
         prompt =f"Generate clean, working {language} code for: {description}. Only provide the code with minimal comments. Return only the code without explanations."
@@ -776,7 +794,8 @@ Support server: https://discord.gg/codexdev"""
     @ai .command (name ="explain",description ="Explain a concept or topic in detail")
     @app_commands .describe (topic ="Topic to explain",level ="Explanation level (beginner/intermediate/advanced)")
     async def ai_explain (self ,ctx :commands .Context ,*,topic :str ,level :str ="intermediate"):
-        """Explain topics using AI"""
+        """
+Explain topics using AI"""
         await ctx .defer ()
 
         level_map ={
@@ -799,7 +818,8 @@ Support server: https://discord.gg/codexdev"""
 
     @ai .command (name ="conversation-clear",description ="Clear your conversation history")
     async def ai_conversation_clear (self ,ctx :commands .Context ):
-        """Clear user's conversation history"""
+        """
+Clear user's conversation history"""
         user_id =ctx .author .id 
         guild_id =ctx .guild .id 
 
@@ -820,7 +840,8 @@ Support server: https://discord.gg/codexdev"""
     @ai .command (name ="mood-analyzer",description ="Analyze the mood/sentiment of text")
     @app_commands .describe (text ="Text to analyze")
     async def ai_mood_analyzer (self ,ctx :commands .Context ,*,text :str ):
-        """Analyze mood and sentiment of text"""
+        """
+Analyze mood and sentiment of text"""
         await ctx .defer ()
 
         prompt =f"Analyze the mood and sentiment of this text. Provide the overall sentiment (positive/negative/neutral), emotional tone, and a brief explanation:\n\n{text}"
@@ -837,8 +858,8 @@ Support server: https://discord.gg/codexdev"""
 
     @ai .command (name ="personality",description ="Set your personal AI personality (Slash command only)")
     async def ai_personality (self ,ctx :commands .Context ):
-        """Set your personal AI personality"""
-
+        """
+Set your personal AI personality"""
         if not hasattr (ctx ,'interaction')or not ctx .interaction :
             view = CV2View("🎭 AI Personality", "This command is only available as a slash command! Use `/ai personality` instead.")
             await ctx .send (view=view)
@@ -855,7 +876,8 @@ Support server: https://discord.gg/codexdev"""
         await ctx .interaction .response .send_modal (modal )
 
     async def _get_user_personality (self ,user_id :int ,guild_id :int )->str :
-        """Get user's personality from database"""
+        """
+Get user's personality from database"""
         try :
             async with self .bot .db .execute (
             "SELECT personality FROM user_personalities WHERE user_id = ? AND guild_id = ?",
@@ -868,10 +890,10 @@ Support server: https://discord.gg/codexdev"""
         except Exception as e :
             logger .error (f"Error getting user personality: {e}")
             return ""
-
     @ai .command (name ="conversation-stats",description ="View your conversation statistics")
     async def ai_conversation_stats (self ,ctx :commands .Context ):
-        """View conversation statistics for the user"""
+        """
+View conversation statistics for the user"""
         await ctx .defer ()
 
         user_id =ctx .author .id 
@@ -895,7 +917,8 @@ Support server: https://discord.gg/codexdev"""
     @ai .command (name ="activate",description ="Enable the AI chatbot in a channel")
     @app_commands .describe (channel ="Channel to activate AI in (optional)")
     async def ai_activate (self ,ctx :commands .Context ,channel :discord .TextChannel =None ):
-        """Enable AI chatbot in a channel"""
+        """
+Enable AI chatbot in a channel"""
         if not ctx .author .guild_permissions .manage_channels :
             view = CV2View(f"{CROSS} Permission Denied", "You need `Manage Channels` permission to activate AI chatbot.")
             await ctx .send (view=view)
@@ -924,7 +947,8 @@ Support server: https://discord.gg/codexdev"""
 
     @ai .command (name ="deactivate",description ="Disable the AI chatbot in the channel")
     async def ai_deactivate (self ,ctx :commands .Context ):
-        """Disable AI chatbot in current server"""
+        """
+Disable AI chatbot in current server"""
         if not ctx .author .guild_permissions .manage_channels :
             view = CV2View(f"{CROSS} Permission Denied", "You need `Manage Channels` permission to deactivate AI chatbot.")
             await ctx .send (view=view)
@@ -953,7 +977,8 @@ Support server: https://discord.gg/codexdev"""
     @ai .command (name ="summarize",description ="Summarize a long text")
     @app_commands .describe (text ="Text to summarize")
     async def ai_summarize (self ,ctx :commands .Context ,*,text :str ):
-        """Summarize text using AI"""
+        """
+Summarize text using AI"""
         await ctx .defer ()
 
 
@@ -985,7 +1010,8 @@ Support server: https://discord.gg/codexdev"""
     @ai .command (name ="ask",description ="Ask the AI a question")
     @app_commands .describe (question ="Question to ask")
     async def ai_ask (self ,ctx :commands .Context ,*,question :str ):
-        """Ask AI a question"""
+        """
+Ask AI a question"""
         await ctx .defer ()
 
         try :
@@ -1000,13 +1026,15 @@ Support server: https://discord.gg/codexdev"""
     @ai .command (name ="fact",description ="Get a random fact or fact on a specific topic")
     @app_commands .describe (topic ="Topic to get a fact about (optional)")
     async def ai_fact (self ,ctx :commands .Context ,*,topic :str =None ):
-        """Get a random fact or fact on a specific topic"""
+        """
+Get a random fact or fact on a specific topic"""
         await ctx .defer ()
         await self .get_fact (ctx ,topic )
 
     @ai .command (name ="database-clear",description ="Clear your AI conversation data and personality")
     async def ai_database_clear (self ,ctx :commands .Context ):
-        """Clear user's own AI conversation data and personality"""
+        """
+Clear user's own AI conversation data and personality"""
         await ctx .defer ()
 
         user_id =ctx .author .id 
@@ -1046,7 +1074,8 @@ Support server: https://discord.gg/codexdev"""
             await ctx .send (view=view, ephemeral =True )
 
     async def _get_conversation_stats (self ,user_id :int ,guild_id :int )->dict :
-        """Get conversation statistics for the user"""
+        """
+Get conversation statistics for the user"""
         try :
             async with self .bot .db .execute (
             "SELECT COUNT(*), MIN(timestamp), MAX(timestamp) FROM conversation_memory WHERE user_id = ? AND guild_id = ?",
@@ -1065,7 +1094,8 @@ Support server: https://discord.gg/codexdev"""
             return None 
 
     async def _store_conversation_message (self ,user_id :int ,guild_id :int ,role :str ,content :str ):
-        """Store a conversation message in the database"""
+        """
+Store a conversation message in the database"""
         try :
             await self .bot .db .execute (
             """
@@ -1079,7 +1109,8 @@ Support server: https://discord.gg/codexdev"""
             logger .error (f"Error storing conversation message: {e}")
 
     async def _get_conversation_history (self ,user_id :int ,guild_id :int ,limit :int =20 )->list :
-        """Get conversation history from database with smart context retention"""
+        """
+Get conversation history from database with smart context retention"""
         try :
             async with self .bot .db .execute (
             """
@@ -1125,7 +1156,8 @@ Support server: https://discord.gg/codexdev"""
             return []
 
     async def _save_chat_history (self ,user_id :int ,guild_id :int ,message :str ,response :str ):
-        """Save chat history to database"""
+        """
+Save chat history to database"""
         try :
             await self .bot .db .execute (
             """
@@ -1139,7 +1171,8 @@ Support server: https://discord.gg/codexdev"""
             logger .error (f"Error saving chat history: {e}")
 
     async def _cleanup_old_conversations (self ):
-        """Smart cleanup of conversation history - keep important context longer"""
+        """
+Smart cleanup of conversation history - keep important context longer"""
         try :
 
             very_old_cutoff =datetime .now (timezone .utc )-timedelta (hours =24 )
@@ -1183,7 +1216,8 @@ Support server: https://discord.gg/codexdev"""
             logger .error (f"Error cleaning up old conversations: {e}")
 
     async def split_and_send (self ,channel ,content :str ,reply_to =None ,allowed_mentions =None ):
-        """Split long messages and send them"""
+        """
+Split long messages and send them"""
         if len (content )<=2000 :
             if reply_to :
                 await reply_to .reply (content ,allowed_mentions =allowed_mentions )
@@ -1210,7 +1244,8 @@ Support server: https://discord.gg/codexdev"""
 
 
     async def get_fact (self ,ctx ,topic :Optional [str ]):
-        """Get a random fact or fact on a specific topic"""
+        """
+Get a random fact or fact on a specific topic"""
         fact =None 
         attempts =0 
         max_attempts =3 
@@ -1282,13 +1317,14 @@ Support server: https://discord.gg/codexdev"""
         await ctx .send (view=view)
 
     async def analyze_image (self ,ctx ,image_url :str ):
-        """Analyze an image using the Gemini Vision API and return CV2View"""
+        """
+Analyze an image using the Gemini Vision API and return CV2View"""
         try :
             if not self .gemini_api_key :
                 return CV2View("🖼️ Image Analysis", "Gemini API key not configured.")
 
             genai .configure (api_key =self .gemini_api_key )
-            model =genai .GenerativeModel ('gemini-1.5-pro')
+            model =genai .GenerativeModel ('gemini-flash-lite-latest')
 
             async with aiohttp .ClientSession ()as session :
                 async with session .get (image_url )as resp :
@@ -1311,7 +1347,8 @@ Support server: https://discord.gg/codexdev"""
             return CV2View("🖼️ Image Analysis", "An error occurred during analysis.")
 
     async def analyze_text (self ,ctx ,text_content :str ):
-        """Analyze text content using AI and send response"""
+        """
+Analyze text content using AI and send response"""
         try :
             prompt =(
             f"Analyze the following text content. Provide insights about its tone, sentiment, "
@@ -1330,7 +1367,8 @@ Support server: https://discord.gg/codexdev"""
             await ctx .send (view=view)
 
     async def generate_trivia_question (self ,category :str ,used_questions :list ):
-        """Generate a trivia question using AI or fallback to question bank"""
+        """
+Generate a trivia question using AI or fallback to question bank"""
         effective_category =category if category !="mixed"else categories [random .randint (0 ,len (categories )-1 )]
         category_key =effective_category .replace (" ","_").lower ()
 
@@ -1428,7 +1466,8 @@ Support server: https://discord.gg/codexdev"""
         return question_data 
 
     async def evaluate_answer (self ,correct_answer :str ,user_answer :str ):
-        """Evaluate if the user's answer is correct using AI"""
+        """
+Evaluate if the user's answer is correct using AI"""
         prompt =(
         f"Determine if the user's answer '{user_answer}' is correct compared to the actual answer '{correct_answer}'.\n"
         "Consider synonyms, minor variations, and partial correctness (e.g., 'United States' vs 'USA').\n"
@@ -1444,7 +1483,8 @@ Support server: https://discord.gg/codexdev"""
             return correct_answer .lower ().strip ()==user_answer .lower ().strip ()
 
     async def start_trivia_game (self ,ctx ,category :Optional [str ]):
-        """Start a trivia game"""
+        """
+Start a trivia game"""
         channel_id =ctx .channel .id 
         if channel_id in self .active_games :
             view = CV2View("🧠 Trivia Game", "A trivia game is already active in this channel!")
@@ -1477,7 +1517,8 @@ Support server: https://discord.gg/codexdev"""
         await ctx .send (view =view )
 
     async def handle_trivia_answer (self ,interaction :discord .Interaction ,channel_id :int ,selected_answer :str ):
-        """Handle trivia answer submission"""
+        """
+Handle trivia answer submission"""
         await interaction .response .defer ()
         game =self .active_games .get (channel_id )
         if not game :
@@ -1542,7 +1583,8 @@ Support server: https://discord.gg/codexdev"""
             await interaction .followup .send (view =view )
 
     async def show_stats (self ,ctx ):
-        """Show user's trivia statistics"""
+        """
+Show user's trivia statistics"""
         user_id =ctx .author .id 
         stats =await self .trivia_scores .find_one ({"userId":user_id })
         if not stats :
@@ -1562,7 +1604,8 @@ Support server: https://discord.gg/codexdev"""
         await ctx .send (view=view)
 
     async def show_leaderboard (self ,ctx ):
-        """Show trivia leaderboard"""
+        """
+Show trivia leaderboard"""
         top_scores =await self .trivia_scores .find ()
         if not top_scores :
             view = CV2View("🏆 Trivia Leaderboard", "No scores yet! Play a trivia game to get started.")
@@ -1585,7 +1628,8 @@ Support server: https://discord.gg/codexdev"""
         await ctx .send (view=view)
 
     async def enable_roleplay (self ,ctx ):
-        """Enable roleplay mode in the current channel"""
+        """
+Enable roleplay mode in the current channel"""
         channel_id =ctx .channel .id 
         user_id =ctx .author .id 
 
@@ -1604,7 +1648,8 @@ Support server: https://discord.gg/codexdev"""
         await ctx .send (view=view)
 
     async def disable_roleplay (self ,ctx ):
-        """Disable roleplay mode in the current channel"""
+        """
+Disable roleplay mode in the current channel"""
         channel_id =ctx .channel .id 
         if channel_id not in self .roleplay_channels :
             view = CV2View("🎭 Roleplay Mode", "Roleplay mode is not enabled in this channel! Use `/ai roleplay-enable` to turn it on.")
@@ -1617,12 +1662,14 @@ Support server: https://discord.gg/codexdev"""
 
     @ai .command (name ="roleplay-enable",description ="Enable roleplay mode in the current channel")
     async def ai_roleplay_enable (self ,ctx :commands .Context ):
-        """Enable roleplay mode"""
+        """
+Enable roleplay mode"""
         await self .enable_roleplay (ctx )
 
     @ai .command (name ="roleplay-disable",description ="Disable roleplay mode in the current channel")
     async def ai_roleplay_disable (self ,ctx :commands .Context ):
-        """Disable roleplay mode"""
+        """
+Disable roleplay mode"""
         await self .disable_roleplay (ctx )
 
 

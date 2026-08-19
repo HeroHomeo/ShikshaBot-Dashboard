@@ -4,17 +4,14 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
 from discord.ext import commands, tasks
-import sqlite3
+from db import sqlite3_mock as sqlite3
 from datetime import datetime, timedelta
 import re
 from utils.cv2 import CV2
@@ -132,6 +129,8 @@ class Jail(commands.Cog):
     @commands.command(name="jail")
     @commands.has_permissions(manage_roles=True)
     async def jail(self, ctx, member: discord.Member, duration: str = None, *, reason="No reason provided"):
+        """
+Executes the jail command."""
         jail_role_id = self.get_setting(ctx.guild.id, "jail_role")
         jail_channel_id = self.get_setting(ctx.guild.id, "jail_channel")
         log_channel_id = self.get_setting(ctx.guild.id, "log_channel")
@@ -185,11 +184,15 @@ class Jail(commands.Cog):
     @commands.command(name="unjail")
     @commands.has_permissions(manage_roles=True)
     async def unjail(self, ctx, member: discord.Member):
+        """
+Executes the unjail command."""
         await self.unjail_member(ctx.guild, member)
         await ctx.send(view=CV2("✅ Success", f"{member.mention} has been unjailed."))
 
     @commands.command(name="jailhistory")
     async def jailhistory(self, ctx, member: discord.Member):
+        """
+Executes the jailhistory command."""
         cursor = self.conn.execute("""
             SELECT reason, jailed_at, duration, mod_id FROM jailed
             WHERE guild_id = ? AND user_id = ?

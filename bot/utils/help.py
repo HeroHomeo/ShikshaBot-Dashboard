@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -39,8 +36,7 @@ class Dropdown(discord.ui.Select):
                 "You must run this command to interact with it.", ephemeral=True)
 
 
-class View(LayoutView):
-
+class View(discord.ui.View):
     def __init__(self, mapping: dict, ctx, homeembed, ui: int):
         super().__init__(timeout=None)
         self.mapping = mapping
@@ -51,30 +47,35 @@ class View(LayoutView):
 
         self.options, self.pages, self.total_pages = self.gen_pages(homeembed)
         self.pages[0]['footer'] = f"• Help page 1/{self.total_pages} | Requested by: {self.ctx.author.display_name}"
-        self._rebuild()
+        self.current_embed = self._rebuild()
 
     def _rebuild(self):
         self.clear_items()
         page = self.pages[self.index]
         page['footer'] = f"• Help page {self.index + 1}/{self.total_pages} | Requested by: {self.ctx.author.display_name}"
 
-        # Build container items (text content)
-        items = []
-        if page.get('title'):
-            items.append(TextDisplay(f"**{page['title']}**"))
-        if page.get('description'):
-            if items:
-                items.append(Separator(visible=True))
-            items.append(TextDisplay(page['description']))
+        embed = discord.Embed(
+            title=page.get('title', ''),
+            description=page.get('description', ''),
+            color=0xFF0000
+        )
+        if page.get('thumbnail'):
+            embed.set_thumbnail(url=page['thumbnail'])
         for name, value in page.get('fields', []):
-            items.append(Separator(visible=True))
-            items.append(TextDisplay(f"**{name}**\n{value}"))
+            if name and value:
+                embed.add_field(name=name, value=value, inline=False)
+        if page.get('footer'):
+            embed.set_footer(text=page['footer'])
 
         # Build buttons
         is_first = self.index == 0
         is_last = self.index >= len(self.pages) - 1
 
-        homeB = discord.ui.Button(label="", emoji=REWIND, style=discord.ButtonStyle.secondary, disabled=is_first)
+        # Build buttons (they will go on the last row)
+        is_first = self.index == 0
+        is_last = self.index >= len(self.pages) - 1
+
+        homeB = discord.ui.Button(label="", emoji=HOME, style=discord.ButtonStyle.secondary, disabled=is_first)
         backB = discord.ui.Button(label="", emoji=PREVIOUS, style=discord.ButtonStyle.secondary, disabled=is_first)
         quitB = discord.ui.Button(label="", emoji=DELETE, style=discord.ButtonStyle.danger)
         nextB = discord.ui.Button(label="", emoji=NEXT, style=discord.ButtonStyle.secondary, disabled=is_last)
@@ -85,30 +86,47 @@ class View(LayoutView):
         quitB.callback = self._quit_cb
         nextB.callback = self._next_cb
         lastB.callback = self._last_cb
+        
+        button_row = 1
 
-        # Add buttons ActionRow inside the container
-        items.append(ActionRow(homeB, backB, quitB, nextB, lastB))
-
-        # Add dropdowns inside the container
+        # Add dropdowns first
         if self.ui == 0:
-            items.append(ActionRow(Dropdown(ctx=self.ctx, options=self.options)))
+            d = Dropdown(ctx=self.ctx, options=self.options, placeholder="Select a command group.")
+            d.row = 0
+            self.add_item(d)
+            button_row = 1
         elif self.ui == 2:
             mid = len(self.options) // 2
             o1, o2 = self.options[:mid], self.options[mid:]
             if o1:
-                items.append(ActionRow(Dropdown(ctx=self.ctx, options=o1, placeholder="Main Commands")))
+                d1 = Dropdown(ctx=self.ctx, options=o1, placeholder="Main Commands")
+                d1.row = 0
+                self.add_item(d1)
             if o2:
-                items.append(ActionRow(Dropdown(ctx=self.ctx, options=o2, placeholder="Extra Commands")))
+                d2 = Dropdown(ctx=self.ctx, options=o2, placeholder="Extra Commands")
+                d2.row = 1
+                self.add_item(d2)
+            button_row = 2
         elif self.ui == 3:
-            items.append(ActionRow(Dropdown(ctx=self.ctx, options=self.options)))
+            d = Dropdown(ctx=self.ctx, options=self.options, placeholder="Select a command group.")
+            d.row = 0
+            self.add_item(d)
+            button_row = 1
 
-        # Add footer after controls
-        if page.get('footer'):
-            items.append(Separator(visible=True))
-            items.append(TextDisplay(f"*{page['footer']}*"))
+        # Add buttons
+        homeB.row = button_row
+        backB.row = button_row
+        quitB.row = button_row
+        nextB.row = button_row
+        lastB.row = button_row
+        
+        self.add_item(homeB)
+        self.add_item(backB)
+        self.add_item(quitB)
+        self.add_item(nextB)
+        self.add_item(lastB)
 
-        # Build the single container with everything inside
-        self.add_item(build_container(*items))
+        return embed
 
     async def _check(self, interaction):
         if interaction.user != self.ctx.author:
@@ -164,22 +182,25 @@ class View(LayoutView):
         total_pages = 0
         used_labels = set()
 
-        options.append(discord.SelectOption(label="Home", emoji=HOME, description=""))
+        options.append(discord.SelectOption(label="Home", emoji=HOME))
 
-        # Convert homeembed (CV2Embed) to page data
+        avatar_url = self.ctx.bot.user.display_avatar.url if self.ctx.bot.user.display_avatar else None
+
         if hasattr(homeembed, '_title'):
             home_page = {
                 'title': homeembed._title or '',
                 'description': homeembed._description or '',
                 'fields': list(homeembed._fields) if hasattr(homeembed, '_fields') else [],
-                'footer': None
+                'footer': None,
+                'thumbnail': avatar_url
             }
         else:
             home_page = {
                 'title': getattr(homeembed, 'title', '') or '',
                 'description': getattr(homeembed, 'description', '') or '',
                 'fields': [(f.name, f.value) for f in homeembed.fields] if hasattr(homeembed, 'fields') and homeembed.fields else [],
-                'footer': homeembed.footer.text if hasattr(homeembed, 'footer') and homeembed.footer else None
+                'footer': homeembed.footer.text if hasattr(homeembed, 'footer') and homeembed.footer else None,
+                'thumbnail': avatar_url
             }
 
         pages.append(home_page)
@@ -197,24 +218,46 @@ class View(LayoutView):
                     label = f"{original_label} {counter}"
                     counter += 1
                 used_labels.add(label)
-                options.append(discord.SelectOption(label=label, emoji=emoji, description=description))
+                
+                options.append(discord.SelectOption(label=label, emoji=emoji.strip() if isinstance(emoji, str) else emoji))
 
-                fields = []
+                cmd_list = []
                 for command in cog.get_commands():
-                    params = ""
-                    for param in command.clean_params:
-                        if param not in ["self", "ctx"]:
-                            params += f" <{param}>"
-                    help_text = command.help or "No description available"
-                    if len(help_text) > 1020:
-                        help_text = help_text[:1017] + "..."
-                    fields.append((f"{command.name}{params}", f"{help_text}\n•"))
+                    # Handle custom shikshabot dummy commands like __Ticket__
+                    if command.name.startswith("__") and command.name.endswith("__"):
+                        if command.short_doc:
+                            # Parse things like "`>vanityroles setup` , `>vanityroles reset `"
+                            subcmds = [s.strip() for s in command.short_doc.split(",")]
+                            for subcmd in subcmds:
+                                if subcmd: 
+                                    # Extract the raw command name (strip backticks and prefix)
+                                    raw_cmd_name = subcmd.replace("`", "").strip()
+                                    if raw_cmd_name.startswith(self.ctx.prefix):
+                                        raw_cmd_name = raw_cmd_name[len(self.ctx.prefix):]
+                                    elif raw_cmd_name.startswith("/"):
+                                        raw_cmd_name = raw_cmd_name[1:]
+                                        
+                                    # Try to find the real command in the bot
+                                    real_subcmd = self.ctx.bot.get_command(raw_cmd_name)
+                                    if real_subcmd:
+                                        help_text = real_subcmd.short_doc or real_subcmd.description or "No description available."
+                                        cmd_list.append(f"{subcmd} - {help_text}")
+                                    else:
+                                        cmd_list.append(f"{subcmd} - No description available.")
+                        else:
+                            cmd_list.append(f"`{self.ctx.prefix}{command.name}` - No description available.")
+                    else:
+                        help_text = command.short_doc or command.description or "No description available."
+                        cmd_list.append(f"`{self.ctx.prefix}{command.name}` - {help_text}")
 
+                desc = "\n".join(cmd_list) if cmd_list else "No commands available."
+                
                 pages.append({
-                    'title': f"{emoji} {original_label}",
-                    'description': '',
-                    'fields': fields,
-                    'footer': None
+                    'title': f"Help Menu",
+                    'description': f"{emoji} **{original_label}**\n{desc}",
+                    'fields': [],
+                    'footer': None,
+                    'thumbnail': avatar_url
                 })
                 total_pages += 1
 
@@ -223,5 +266,5 @@ class View(LayoutView):
     async def set_page(self, page, interaction):
         self.index = page
         self.current_page = page
-        self._rebuild()
-        await interaction.response.edit_message(view=self)
+        embed = self._rebuild()
+        await interaction.response.edit_message(embed=embed, view=self)

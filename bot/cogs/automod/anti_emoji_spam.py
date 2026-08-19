@@ -4,18 +4,15 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
 from utils.emoji import TICK
 from discord.ext import commands
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import re
 from datetime import timedelta
 import asyncio
@@ -74,6 +71,7 @@ class AntiEmojiSpam(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        """Executes the on message command."""
         if message.author.bot:
             return
 
@@ -99,18 +97,30 @@ class AntiEmojiSpam(commands.Cog):
         
         emoji_pattern = re.compile(
             r"<a?:[a-zA-Z0-9_]+:([0-9]+)>|"  #discord emojis
-            r"([\U0001F600-\U0001F64F]|"         # Emoticons 
-            r"[\U0001F300-\U0001F5FF]|"         # Miscellaneous Symbols and Pictographs
-            r"[\U0001F680-\U0001F6FF]|"         # Transport and Map Symbols
-            r"[\U0001F700-\U0001F77F]|"         # Alchemical Symbols
-            r"[\U0001F780-\U0001F7FF]|"         # Geometric Shapes Extended
-            r"[\U0001F800-\U0001F8FF]|"         # Supplemental Arrows-C
-            r"[\U0001F900-\U0001F9FF]|"         # Supplemental Symbols and Pictographs
-            r"[\U0001FA00-\U0001FAFF]|"         # Chess Symbols
-            r"[\U00002700-\U000027BF]|"         # Miscellaneous Symbols
-            r"[\U0001F1E6-\U0001F1FF]|"         # Regional Indicator Symbols
-            r"[\U0001F004-\U0001F0CF]|"         # Mahjong Tiles and Playing Cards
-            r"[\U0001F9B0-\U0001F9FF]"          # Additional Emoji
+            r"([\U0001F600-\U0001F64F]|"
+         # Emoticons 
+            r"[\U0001F300-\U0001F5FF]|"
+         # Miscellaneous Symbols and Pictographs
+            r"[\U0001F680-\U0001F6FF]|"
+         # Transport and Map Symbols
+            r"[\U0001F700-\U0001F77F]|"
+         # Alchemical Symbols
+            r"[\U0001F780-\U0001F7FF]|"
+         # Geometric Shapes Extended
+            r"[\U0001F800-\U0001F8FF]|"
+         # Supplemental Arrows-C
+            r"[\U0001F900-\U0001F9FF]|"
+         # Supplemental Symbols and Pictographs
+            r"[\U0001FA00-\U0001FAFF]|"
+         # Chess Symbols
+            r"[\U00002700-\U000027BF]|"
+         # Miscellaneous Symbols
+            r"[\U0001F1E6-\U0001F1FF]|"
+         # Regional Indicator Symbols
+            r"[\U0001F004-\U0001F0CF]|"
+         # Mahjong Tiles and Playing Cards
+            r"[\U0001F9B0-\U0001F9FF]"
+          # Additional Emoji
             r")"
         )
         
@@ -156,5 +166,6 @@ class AntiEmojiSpam(commands.Cog):
 
     @commands.Cog.listener()
     async def on_rate_limit(self, message):
+        """Executes the on rate limit command."""
         await asyncio.sleep(10)
 

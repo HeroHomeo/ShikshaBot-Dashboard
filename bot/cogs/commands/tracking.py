@@ -4,18 +4,15 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
 from utils.emoji import ARROWRED
 from discord.ext import commands
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 from utils.cv2 import CV2
 
 INVITE_DB = "db/invite.db"
@@ -49,6 +46,7 @@ class Tracking(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        """Executes the on ready command."""
         import asyncio
         async def fetch_invites(guild):
             try:
@@ -62,6 +60,7 @@ class Tracking(commands.Cog):
 
     @commands.Cog.listener()
     async def on_invite_create(self, invite):
+        """Executes the on invite create command."""
         try:
             self.invites[invite.guild.id] = await invite.guild.invites()
         except discord.Forbidden:
@@ -69,6 +68,7 @@ class Tracking(commands.Cog):
 
     @commands.Cog.listener()
     async def on_invite_delete(self, invite):
+        """Executes the on invite delete command."""
         try:
             self.invites[invite.guild.id] = await invite.guild.invites()
         except discord.Forbidden:
@@ -76,6 +76,7 @@ class Tracking(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
+        """Executes the on member join command."""
         guild = member.guild
         await self.ensure_tables(guild.id)
 
@@ -124,6 +125,7 @@ class Tracking(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
+        """Executes the on member remove command."""
         guild = member.guild
         await self.ensure_tables(guild.id)
         async with aiosqlite.connect(INVITE_DB) as db:
@@ -138,6 +140,8 @@ class Tracking(commands.Cog):
 
     @commands.command(aliases=["inv"])
     async def invites(self, ctx, member: discord.Member = None):
+        """
+Executes the invites command."""
         member = member or ctx.author
         await self.ensure_tables(ctx.guild.id)
 
@@ -157,13 +161,15 @@ class Tracking(commands.Cog):
             f"**Fake:** `{fake}`\n"
             f"**Left:** `{left}`\n"
             f"**Rejoins:** `{rejoin}`\n\n"
-            f"{EMOJI_INVITE} **Get {BotName} Premium Lifetime [Join Support Here](https://discord.gg/codexdev)**"
+            f"{EMOJI_INVITE} **Get {BotName} Premium Lifetime**"
         )
         await ctx.send(view=CV2(f"Invite Log - {member.name}", desc))
 
     @commands.command(aliases=["addinvs"])
     @commands.has_permissions(administrator=True)
     async def addinvites(self, ctx, member: discord.Member, amount: int):
+        """
+Executes the addinvites command."""
         await self.ensure_tables(ctx.guild.id)
         async with aiosqlite.connect(INVITE_DB) as db:
             await db.execute(f"INSERT OR IGNORE INTO invites_{ctx.guild.id} (user_id) VALUES (?)", (member.id,))
@@ -174,6 +180,8 @@ class Tracking(commands.Cog):
     @commands.command(aliases=["setinvs"])
     @commands.has_permissions(administrator=True)
     async def setinvites(self, ctx, member: discord.Member, amount: int):
+        """
+Executes the setinvites command."""
         await self.ensure_tables(ctx.guild.id)
         async with aiosqlite.connect(INVITE_DB) as db:
             await db.execute(f"INSERT OR REPLACE INTO invites_{ctx.guild.id} (user_id, total) VALUES (?, ?)", (member.id, amount))
@@ -183,6 +191,8 @@ class Tracking(commands.Cog):
     @commands.command(aliases=["resetinvs"])
     @commands.has_permissions(administrator=True)
     async def resetinvites(self, ctx, member: discord.Member):
+        """
+Executes the resetinvites command."""
         await self.ensure_tables(ctx.guild.id)
         async with aiosqlite.connect(INVITE_DB) as db:
             await db.execute(f"DELETE FROM invites_{ctx.guild.id} WHERE user_id = ?", (member.id,))
@@ -191,6 +201,8 @@ class Tracking(commands.Cog):
 
     @commands.command(aliases=["invlb"])
     async def invitesleaderboard(self, ctx):
+        """
+Executes the invitesleaderboard command."""
         await self.ensure_tables(ctx.guild.id)
         async with aiosqlite.connect(INVITE_DB) as db:
             async with db.execute(f"SELECT user_id, total FROM invites_{ctx.guild.id} ORDER BY total DESC LIMIT 10") as cursor:
@@ -211,6 +223,8 @@ class Tracking(commands.Cog):
     @commands.command(aliases=["invlog"])
     @commands.has_permissions(administrator=True)
     async def invitelogging(self, ctx, channel: discord.TextChannel):
+        """
+Executes the invitelogging command."""
         await self.ensure_tables(ctx.guild.id)
         async with aiosqlite.connect(INVITE_DB) as db:
             await db.execute("INSERT OR REPLACE INTO logging (guild_id, channel_id) VALUES (?, ?)", (ctx.guild.id, channel.id))

@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -16,7 +13,7 @@ import discord
 from utils.emoji import CROSS, TICK, ZWARNING
 from discord.ext import commands
 from discord.ui import LayoutView, TextDisplay, Separator, Container, ActionRow, Button
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 from utils.Tools import *
 from utils.cv2 import CV2, build_container
 from utils.config import OWNER_IDS_STR
@@ -48,7 +45,6 @@ class ConfirmView(LayoutView):
     @property
     def _desc(self):
         return ""
-
     async def confirm_callback(self, interaction: discord.Interaction):
         if interaction.user != self.ctx.author:
             return await interaction.response.send_message("You cannot interact with this confirmation.", ephemeral=True)

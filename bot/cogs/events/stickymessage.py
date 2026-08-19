@@ -4,16 +4,13 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 import json
 import asyncio
 from discord.ext import commands
@@ -27,6 +24,7 @@ class StickyMessageListener(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        """Executes the on message command."""
 
         if message.author.bot:
             return
@@ -178,6 +176,7 @@ class StickyMessageListener(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
+        """Executes the on guild channel delete command."""
         try:
             async with aiosqlite.connect("db/stickymessages.db") as db:
                 await db.execute(
@@ -190,6 +189,7 @@ class StickyMessageListener(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
+        """Executes the on guild remove command."""
         try:
             async with aiosqlite.connect("db/stickymessages.db") as db:
                 await db.execute(

@@ -4,28 +4,26 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 import discord
 import json
-import aiosqlite
+from db import aiosqlite_mock as aiosqlite
 from discord.ext import commands
 from utils.config import serverLink
-from core import zyrox, Cog, Context
+from core import shikshabot, Cog, Context
 from utils.Tools import get_ignore_data
 
 class Errors(Cog):
-  def __init__(self, client: zyrox):
+  def __init__(self, client: shikshabot):
     self.client = client
 
   @commands.Cog.listener()
   async def on_command_error(self, ctx: Context, error):
+    """Executes the on command error command."""
     if ctx.command is None:
       return
     

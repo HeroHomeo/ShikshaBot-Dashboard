@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -18,12 +15,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TOKEN      = os.environ.get("TOKEN")
-BRAND_NAME = os.environ.get("brand_name", "Zyrox X")
+BRAND_NAME = os.environ.get("brand_name", "ShikshaBot X")
 NAME       = BRAND_NAME
 BotName    = BRAND_NAME
 
-server     = "https://discord.gg/codexdev"
-serverLink = "https://discord.gg/codexdev"
+server     = ""
+serverLink = ""
 ch         = "https://discord.com/channels/699587669059174461/1271825678710476911"
 
 CMD_WEBHOOK_URL = os.getenv("CMD_WEBHOOK_URL")

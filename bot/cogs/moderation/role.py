@@ -4,11 +4,8 @@
 # ║   ░█░░░█░█░█░█░█▀▀░▄▀▄   ░█░█░█▀▀░▀▄▀░▀▀█                     ║
 # ║   ░▀▀▀░▀▀▀░▀▀░░▀▀▀░▀░▀   ░▀▀░░▀▀▀░░▀░░▀▀▀                     ║
 # ║                                                                  ║
-# ║            © 2026 CodeX Devs — All Rights Reserved              ║
+# ║           © 2026 Avinash aka Shroud.bean — All Rights Reserved    ║
 # ║                                                                  ║
-# ║   discord  ──  https://discord.gg/codexdev                      ║
-# ║   youtube  ──  https://youtube.com/@CodeXDevs                   ║
-# ║   github   ──  https://github.com/RayExo                        ║
 # ║                                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
@@ -67,6 +64,8 @@ class Role(commands.Cog):
   @top_check()
   @blacklist_check()
   async def role(self, ctx, member: discord.Member, *, role: discord.Role):
+    """
+Executes the role command."""
     if not ctx.guild.me.guild_permissions.manage_roles:
         return await ctx.send(f"{ZWARNING} I don't have permission to manage roles!")
 
@@ -610,6 +609,7 @@ class Role(commands.Cog):
   @blacklist_check()
   @commands.has_permissions(administrator=True)
   async def rrole(self,ctx):
+    """Executes the rrole command."""
     if ctx.subcommand_passed is None:
       await ctx.send_help(ctx.command)
       ctx.command.reset_cooldown(ctx)
